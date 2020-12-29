@@ -1,0 +1,345 @@
+.billing {
+  max-width: 1920px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  margin-top: 5rem;
+}
+
+.billing__checkout {
+  margin-right: 5rem;
+  padding-right: 5rem;
+  border-right: 1px solid black;
+  width: 600px;
+}
+
+.billing__checkout__label {
+  font-size: 1.8rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  margin-bottom: 1rem;
+}
+
+.billing__checkout__content {
+  margin-bottom: 3rem;
+  position: relative;
+}
+
+.billing__checkout__content__label {
+  font-size: 1.2rem;
+  font-weight: 600;
+  border-top: 1px solid black;
+  line-height: 2.5rem;
+  color: black;
+  text-transform: capitalize;
+  text-decoration: underline;
+  padding-top: 1rem;
+}
+
+.billing__checkout__content__container__address-container {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+}
+
+.billing__checkout__content__container__address-container__address {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  margin: 1rem;
+}
+
+.billing__checkout__content__container__address-container__address input {
+  width: 2rem !important;
+  height: 1rem;
+  margin: 0 !important;
+  margin-top: 3px !important;
+  cursor: pointer;
+}
+
+.billing__checkout__content__container__address-container__address__desc__name {
+  font-weight: 500;
+  color: #000000;
+  margin-bottom: 0.5rem;
+}
+
+.billing__checkout__content__container__address-container__address__desc p {
+  font-size: 0.9rem;
+}
+
+.billing__checkout__content__container__form {
+  margin-top: 2rem;
+}
+
+.billing__checkout__content__container__form--hidden, .billing__checkout__content__container__form--billing--hidden {
+  display: none;
+}
+
+.billing__checkout__content__container__form input,
+.billing__checkout__content__container__form select {
+  font-size: 0.9rem;
+  padding: 0.8rem 0 0.8rem 1rem;
+  border: none;
+  background-color: #ececec;
+  border-radius: 5px;
+  margin: 1rem 0;
+  display: block;
+  width: 100%;
+}
+
+.billing__checkout__content__container__form__flex {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.billing__checkout__content__container__form__flex input {
+  width: 260px;
+  margin: 0;
+}
+
+.billing__checkout__content__container__form__flex input:first-child {
+  margin-right: 1rem;
+}
+
+.billing__checkout__content__container__form button {
+  font-weight: 500;
+  font-size: 0.9rem;
+  line-height: 2.5rem;
+  border: none;
+  background-color: black;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  text-transform: capitalize;
+  padding: 0 1rem;
+  display: block;
+  margin-top: 2rem;
+  margin-left: auto;
+}
+
+.billing__checkout__content__container__form__checkbox {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
+  margin-left: auto;
+}
+
+.billing__checkout__content__container__form__checkbox input {
+  margin-right: 0.8rem;
+  width: auto;
+  cursor: pointer;
+}
+
+.billing__checkout__content__container__form__label {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  margin-top: 2rem;
+}
+
+.billing__checkout__content__container__form--billing {
+  margin-top: 3rem;
+  border-top: 1px solid black;
+}
+
+.billing__checkout__content__container__form__card #card-number,
+.billing__checkout__content__container__form__card #cvv,
+.billing__checkout__content__container__form__card #expiration-date {
+  font-size: 0.9rem;
+  padding: 0.8rem 0 0.8rem 1rem;
+  height: 40.6px;
+  border: none;
+  background-color: #ececec;
+  border-radius: 5px;
+  margin: 1rem 0;
+}
+
+.billing__checkout__content__container__form__card__cvv-container {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.billing__checkout__content__container__form__card__cvv-container #cvv {
+  width: 5rem;
+  margin-right: 2rem;
+}
+
+.billing__checkout__content__container__form__card__cvv-container #expiration-date {
+  width: 10rem;
+}
+
+.billing__checkout__content__container__desc {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.billing__checkout__content__container__desc__label {
+  font-weight: 700;
+  margin-right: 8rem;
+  margin-top: 2rem !important;
+}
+
+.billing__checkout__content__container__desc p {
+  line-height: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.billing__checkout__content__container__desc p:first-child {
+  margin-top: 1rem;
+}
+
+.billing__checkout__content__container__desc--hidden {
+  display: none;
+}
+
+.billing__checkout__content__container__desc__edit {
+  text-transform: capitalize;
+  font-size: 0.8rem;
+  text-decoration: underline;
+  color: #747272;
+  cursor: pointer;
+  position: absolute;
+  top: 1rem;
+  right: 0;
+}
+
+.billing__cart__summary {
+  width: 23rem;
+}
+
+.billing__cart__summary__label {
+  font-weight: 600;
+  text-transform: capitalize;
+  line-height: 2rem;
+  border-bottom: 1px solid black;
+  margin-bottom: 2rem;
+  font-size: 1.2rem;
+}
+
+.billing__cart__summary__desc {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  line-height: 2rem;
+  font-size: 0.9rem;
+}
+
+.billing__cart__summary__total {
+  margin-top: 1rem;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 2rem;
+  border-top: 1px solid black;
+}
+
+.billing__cart__items {
+  padding-right: 5rem;
+  margin-right: 3rem;
+  margin-top: 5rem;
+  width: 100%;
+}
+
+.billing__cart__items__label {
+  margin-top: 3rem;
+  text-transform: capitalize;
+  line-height: 2rem;
+  border-bottom: 1px solid black;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  font-size: 1rem;
+  font-size: 1.2rem;
+}
+
+.billing__cart__items__item {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  padding: 2rem 0 1.5rem;
+  border-bottom: 1px solid black;
+  position: relative;
+}
+
+.billing__cart__items__item__content {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.billing__cart__items__item__content img {
+  width: 6rem;
+  height: 8rem;
+  margin-right: 1rem;
+}
+
+.billing__cart__items__item__content__desc {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.billing__cart__items__item__content__desc a {
+  color: #636262;
+}
+
+.billing__cart__items__item__content__desc__name {
+  font-size: 0.9rem;
+  text-transform: capitalize;
+}
+
+.billing__cart__items__item__price p {
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-right: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.billing__cart__items__item__price p:last-child {
+  font-weight: 400;
+  font-size: 0.8rem;
+}
+
+.billing__cart__items__item__link-container {
+  position: absolute;
+  bottom: 1rem;
+  right: 0;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.billing__cart__items__item__link-container p {
+  font-size: 0.8rem;
+  text-decoration: underline;
+  cursor: pointer;
+  text-transform: capitalize;
+}
+
+.billing__cart__items__item:last-child {
+  border-bottom: none;
+}
+/*# sourceMappingURL=backup.css.map */

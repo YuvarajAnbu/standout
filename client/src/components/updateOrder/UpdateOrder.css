@@ -1,0 +1,102 @@
+.update-order {
+  margin: 3rem auto;
+  max-width: 300px;
+  color: #202124;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  position: relative;
+}
+
+.update-order form input {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid #dadce0;
+  padding: 1rem;
+  padding-bottom: 5px;
+  border-radius: 8px 8px 0 0;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  padding-right: 35px;
+}
+
+.update-order form button {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  cursor: pointer;
+  border: none;
+  background-color: transparent;
+}
+
+.update-order__order {
+  padding: 1rem;
+}
+
+.update-order__order__delivered {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: distribute;
+      justify-content: space-around;
+}
+
+.update-order__order__delivered input {
+  color: black;
+  cursor: pointer;
+}
+
+.update-order__order__delivered p {
+  text-transform: capitalize;
+}
+
+.update-order__order button {
+  margin-top: 1rem;
+  background-color: black;
+  width: 100%;
+  color: white;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  text-transform: uppercase;
+  margin-top: 30px;
+  width: 266px;
+  height: 35px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  border: 1px solid black;
+}
+
+.update-order__no-order {
+  padding: 1rem;
+}
+
+.update-order__button--loading {
+  background-color: white !important;
+}
+
+.update-order__button__loading {
+  width: 15px;
+  height: 15px;
+  border: double 1px transparent;
+  border-radius: 80px;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(white), to(white)), radial-gradient(circle at top, #5e5e5e 30%, black 70%);
+  background-image: linear-gradient(white, white), radial-gradient(circle at top, #5e5e5e 30%, black 70%);
+  background-origin: border-box;
+  background-clip: content-box, border-box;
+  -webkit-animation: spin 2s linear infinite;
+          animation: spin 2s linear infinite;
+}
+/*# sourceMappingURL=UpdateOrder.css.map */
