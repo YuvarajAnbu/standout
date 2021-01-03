@@ -234,7 +234,7 @@ router.get("/trending", async (req, res) => {
   const { page, limit, ...query } = req.query;
 
   try {
-    const date = new Date();
+    const date = new Date("2020, 12, 15");
     const month = Number(`${date.getFullYear()}${date.getMonth() + 1}`);
 
     let obj = {};
@@ -380,7 +380,7 @@ router.get("/filter/trending", async (req, res) => {
       sizes: [],
     };
 
-    const date = new Date();
+    const date = new Date("2020, 12, 15");
 
     const month = Number(`${date.getFullYear()}${date.getMonth() + 1}`);
 

@@ -28,25 +28,6 @@ if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "/../client/build")));
 
   app.get("*", auth, (req, res) => {
-    if (typeof req.userId === "undefined") {
-      const date = new Date();
-      const nextYear = date.getFullYear() + 1;
-      date.setFullYear(nextYear);
-
-      res.cookie(
-        "__Host-token",
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZmM1NTBmMGIzZDcyNTQ3ODBlNWVmYmYiLCJpYXQiOjE2MDkyNzgzNTV9.pIsMy7ZTEzrbdVjANaGS8MnimL9w6unPGGXm2-jm_Oo",
-        {
-          expires: date,
-          secure: true,
-          sameSite: "lax",
-          path: "/",
-          secure: true,
-          httpOnly: true,
-        }
-      );
-    }
-
     res.sendFile(path.join(__dirname, "/../client/build/index.html"));
   });
 }
