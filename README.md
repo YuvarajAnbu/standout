@@ -1,7 +1,7 @@
  # Standout
 An online clothing store, where you can BUY, ADD, EDIT, and DELETE products.
 You'll be welcomed to the website as an owner of the site and you have full access and customization of it.
-you can't do any changes on the database cuz i don't want people to mess it up. i used local storage instead of database to track product changes and orders.
+you can't do any changes on the database cuz i don't want people to mess it up. i used local storage instead of database to track product changes and orders. <br>
 [standout-clothing-store.herokuapp.com](https://standout-clothing-store.herokuapp.com)
 
 
