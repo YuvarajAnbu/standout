@@ -18,11 +18,9 @@ function MenSection() {
         <h2>Shop Suits, Jeans, Shirts & More</h2>
         <p>
           Find new men's suits, dress pants, dress shirts, chinos, jeans and
-          more all in one place at StandOut. Whether you need a new work
-          wardrobe for your job, some casual pieces like shorts, joggers and
-          t-shirts for the weekend, or everyday essentials like undershirts,
-          boxers and socks, we've got you covered. Shop clothing for men online
-          or in-store today.
+          more all in one place at Express. Whether you need a new work wardrobe
+          for your job or some casual pieces like shorts, we've got you covered.
+          Shop clothing for men online or in-store today.
         </p>
         <div className="home__section__content__links-container">
           {links.map((el, index) => (

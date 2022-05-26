@@ -12,9 +12,8 @@ function WomenSection() {
           Find women's clothing at StandOut. From dresses and jumpsuits, to
           jeans and dress pants, update your wardrobe all in one place. If you
           need to upgrade your style game at work, try a new suit, dressy top,
-          work dress or dark wash jeans. Want something a little fancier? Try a
-          cute jumpsuit or romper for your next date night, wedding or girls
-          night out! Shop clothing for women online or in-store today.
+          work dress or dark wash jeans. Shop clothing for women online or
+          in-store today.
         </p>
         <div className="home__section__content__links-container">
           {links.map((el, index) => (
