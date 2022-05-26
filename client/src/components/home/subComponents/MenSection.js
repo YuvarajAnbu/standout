@@ -1,8 +1,8 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 function MenSection() {
-  const links = ["shirts", "jackets", "suitings", "t-shirts"];
+  const links = ['shirts', 'jackets', 'suitings', 't-shirts'];
 
   return (
     <div className=" home__section home__section--men">
@@ -15,12 +15,14 @@ function MenSection() {
       </div>
 
       <div className="home__section__content  home__section--men__content">
-        <h2>Lorem ipsum dolor sit, amet</h2>
+        <h2>Shop Suits, Jeans, Shirts & More</h2>
         <p>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Libero enim
-          harum ducimus quaerat nostrum eaque adipisci aperiam aut maiores eum
-          praesentium voluptatum, iure quia laborum mollitia soluta quasi
-          ratione illo. Ea nisi,
+          Find new men's suits, dress pants, dress shirts, chinos, jeans and
+          more all in one place at StandOut. Whether you need a new work
+          wardrobe for your job, some casual pieces like shorts, joggers and
+          t-shirts for the weekend, or everyday essentials like undershirts,
+          boxers and socks, we've got you covered. Shop clothing for men online
+          or in-store today.
         </p>
         <div className="home__section__content__links-container">
           {links.map((el, index) => (

@@ -1,18 +1,20 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 function WomenSection() {
-  const links = ["dresses", "rompers", "tops", "shoes"];
+  const links = ['dresses', 'rompers', 'tops', 'shoes'];
 
   return (
     <div className=" home__section home__section--women">
       <div className="home__section__content home__section--women__content">
-        <h2>Lorem ipsum dolor sit, amet</h2>
+        <h2>Shop Dresses, Jeans, Dress Pants, Tops & More</h2>
         <p>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Libero enim
-          harum ducimus quaerat nostrum eaque adipisci aperiam aut maiores eum
-          praesentium voluptatum, iure quia laborum mollitia soluta quasi
-          ratione illo. Ea nisi,
+          Find women's clothing at StandOut. From dresses and jumpsuits, to
+          jeans and dress pants, update your wardrobe all in one place. If you
+          need to upgrade your style game at work, try a new suit, dressy top,
+          work dress or dark wash jeans. Want something a little fancier? Try a
+          cute jumpsuit or romper for your next date night, wedding or girls
+          night out! Shop clothing for women online or in-store today.
         </p>
         <div className="home__section__content__links-container">
           {links.map((el, index) => (
