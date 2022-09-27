@@ -23,15 +23,15 @@ app.use("/user", userRouter);
 app.use("/product", productRouter);
 app.use("/payment", paymentRouter);
 
-if (process.env.NODE_ENV === "production") {
-  // Set static folder
-  app.use(express.static(path.join(__dirname, "/../client/build")));
+// if (process.env.NODE_ENV === "production") {
+// Set static folder
+app.use(express.static(path.join(__dirname, "/../client/build")));
 
-  app.get("*", auth, (req, res) => {
-    res.sendFile(path.join(__dirname, "/../client/build/index.html"));
-  });
-}
+app.get("*", auth, (req, res) => {
+  res.sendFile(path.join(__dirname, "/../client/build/index.html"));
+});
+// }
 
 app.listen(port, () => console.log(`server running on ${port}`));
 
-console.log(process.env.NODE_ENV);
+console.log(process.env);
