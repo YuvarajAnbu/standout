@@ -23,6 +23,8 @@ app.use("/user", userRouter);
 app.use("/product", productRouter);
 app.use("/payment", paymentRouter);
 
+//use this only in production and disable it in client side
+
 // if (process.env.NODE_ENV === "production") {
 // Set static folder
 app.use(express.static(path.join(__dirname, "/../client/build")));
@@ -33,5 +35,3 @@ app.get("*", auth, (req, res) => {
 // }
 
 app.listen(port, () => console.log(`server running on ${port}`));
-
-console.log(process.env);
