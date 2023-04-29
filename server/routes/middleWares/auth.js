@@ -12,11 +12,13 @@ module.exports = async (req, res, next) => {
       token = el.split("=")[1];
     }
   });
+  if (token) {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.userId = decoded._id;
+    req.token = token;
+  }
 
-  req.userId = decoded._id;
-  req.token = token;
   next();
   return;
 };
