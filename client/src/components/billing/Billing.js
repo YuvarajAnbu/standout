@@ -1,12 +1,18 @@
 import React, { useContext, useEffect, useState } from "react";
 import "./Billing.css";
-import { CartContext, UserContext, ColorsContext } from "../../App";
+import {
+  CartContext,
+  UserContext,
+  ColorsContext,
+  imgPrefixContext,
+} from "../../App";
 import { Link } from "react-router-dom";
 import User from "./subComponents/User";
 import Address from "./subComponents/Address";
 import Card from "./subComponents/Card";
 
 function Billing() {
+  const imgPrefix = useContext(imgPrefixContext);
   const { cart, setCart } = useContext(CartContext);
   const { user } = useContext(UserContext);
   const colors = useContext(ColorsContext);
@@ -231,7 +237,7 @@ function Billing() {
                 <div className="billing__cart__items__item__content__img">
                   <Link to={`/item/${el._id}`}>
                     <img
-                      src={el.image}
+                      src={imgPrefix(100) + el.image}
                       alt={el.name}
                       onError={(e) => {
                         e.target.src = "/images/imgFailed.jpg";

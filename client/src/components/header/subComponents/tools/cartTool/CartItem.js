@@ -1,13 +1,15 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Link } from "react-router-dom";
+import { imgPrefixContext } from "../../../../../App";
 
 function CartItem({ item, setCart, setIfHide, setBlackBox, colors }) {
+  const imgPrefix = useContext(imgPrefixContext);
   return (
     <div className="nav-bar__tools__cart__items-container__items__item">
       <div className="nav-bar__tools__cart__items-container__items__item__img">
         <Link to={`/item/${item._id}`}>
           <img
-            src={item.image}
+            src={imgPrefix(100) + item.image}
             alt={item.name}
             onClick={() => {
               setIfHide(true);

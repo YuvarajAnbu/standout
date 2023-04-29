@@ -5,10 +5,11 @@ import Filter from "./subComponents/filter/Filter";
 import ShopItem from "./subComponents/ShopItem";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { UserProductsContext, HideProductsContext } from "../../App";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function Shop({ title, link }) {
-  const history = useHistory();
+  // const history = useHistory();
+  const navigate = useNavigate();
   const { userProducts } = useContext(UserProductsContext);
   const { hideProducts } = useContext(HideProductsContext);
 
@@ -53,6 +54,8 @@ function Shop({ title, link }) {
 
   const [update, setUpdate] = useState(0);
 
+  const [noRes, setNoRes] = useState(false);
+
   useEffect(() => {
     document.title = `${title} | Stand Out`;
   }, [title]);
@@ -77,21 +80,22 @@ function Shop({ title, link }) {
   }, [resizeEvent]);
 
   const reset = useCallback(() => {
-    if (itemStock.colors.length > 0) {
-      setPage(0);
-      setHideFilter({
-        sort: true,
-        color: true,
-        size: true,
-      });
-      setFilter({
-        sort: "",
-        color: [],
-        size: [],
-      });
-      setLastClicked("");
-      setUpdate((prev) => prev + 1);
-    }
+    // if (itemStock.colors.length > 0) {
+    setPage(0);
+    setHideFilter({
+      sort: true,
+      color: true,
+      size: true,
+    });
+    setFilter({
+      sort: "",
+      color: [],
+      size: [],
+    });
+    setLastClicked("");
+    setUpdate((prev) => prev + 1);
+    setNoRes(false);
+    // }
   }, [itemStock]);
 
   useEffect(reset, [link]);
@@ -337,7 +341,9 @@ function Shop({ title, link }) {
           });
           getItems();
         } else {
-          history.replace("/404");
+          setNoRes(true);
+          // history.replace("/404");
+          // navigate("/404", { replace: true });
         }
       })
       .catch((err) => {
@@ -346,7 +352,7 @@ function Shop({ title, link }) {
   }, [
     filter,
     lastClicked,
-    history,
+    navigate,
     link,
     getItems,
     userProducts,
@@ -399,6 +405,7 @@ function Shop({ title, link }) {
     <div className="shop">
       <Filter
         {...{
+          hide: noRes,
           filter,
           setFilter,
           itemStock,
@@ -412,72 +419,80 @@ function Shop({ title, link }) {
         }}
       />
       <div className="shop__items-container">
-        <div className="shop__items-container__title">
-          <h1>{title}</h1>
-          <p
-            onClick={() => {
-              setShowFilters((prev) => !prev);
-              setBlackBox((prev) => !prev);
-            }}
-          >
-            filter
-            <FontAwesomeIcon className="icon" icon="chevron-right" />
-          </p>
-        </div>
-        {items.length <= 0 ? (
-          <div className="shop__loading__box">
-            {limitArr().map((index) => (
-              <div
-                key={index}
-                className="shop__loading__container shop__loading__container--item"
-              >
-                <div className="shop__loading__container__img"></div>
-                <div className="shop__loading__container__text shop__loading__container__text--name"></div>
-                <div className="shop__loading__container__text"></div>
-                <div className="shop__loading__container__text"></div>
-              </div>
-            ))}
+        {noRes ? (
+          <div className="shop__items-container__title">
+            <h1>No result for {title}</h1>
           </div>
         ) : (
-          <div className="shop__items-container__items">
-            {items.map((el, index) => (
-              <ShopItem
-                key={index}
-                {...{ el, stockIndex, index, setStockIndex }}
-              />
-            ))}
-          </div>
-        )}
-
-        {items.length > 0 && (
-          <div>
-            <p className="shop__items-container__count">
-              {page * limit < itemsCount
-                ? `${page * limit}/${itemsCount} products`
-                : `${itemsCount}/${itemsCount} products`}
-            </p>
-            {page * limit < itemsCount && (
-              <button
-                className={
-                  PaginateLoading
-                    ? "shop__items-container__load-more shop__items-container__load-more--loading"
-                    : "shop__items-container__load-more"
-                }
-                type="button"
+          <>
+            <div className="shop__items-container__title">
+              <h1>{title}</h1>
+              <p
                 onClick={() => {
-                  if (!PaginateLoading) {
-                    pagination();
-                  }
+                  setShowFilters((prev) => !prev);
+                  setBlackBox((prev) => !prev);
                 }}
               >
-                {PaginateLoading ? (
-                  <div className="shop__items-container__load-more__loading"></div>
-                ) : (
-                  "load more"
-                )}
-              </button>
+                filter
+                <FontAwesomeIcon className="icon" icon="chevron-right" />
+              </p>
+            </div>
+            {items.length <= 0 ? (
+              <div className="shop__loading__box">
+                {limitArr().map((index) => (
+                  <div
+                    key={index}
+                    className="shop__loading__container shop__loading__container--item"
+                  >
+                    <div className="shop__loading__container__img"></div>
+                    <div className="shop__loading__container__text shop__loading__container__text--name"></div>
+                    <div className="shop__loading__container__text"></div>
+                    <div className="shop__loading__container__text"></div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="shop__items-container__items">
+                {items.map((el, index) => (
+                  <ShopItem
+                    key={index}
+                    {...{ el, stockIndex, index, setStockIndex }}
+                  />
+                ))}
+              </div>
             )}
-          </div>
+
+            {items.length > 0 && (
+              <div>
+                <p className="shop__items-container__count">
+                  {page * limit < itemsCount
+                    ? `${page * limit}/${itemsCount} products`
+                    : `${itemsCount}/${itemsCount} products`}
+                </p>
+                {page * limit < itemsCount && (
+                  <button
+                    className={
+                      PaginateLoading
+                        ? "shop__items-container__load-more shop__items-container__load-more--loading"
+                        : "shop__items-container__load-more"
+                    }
+                    type="button"
+                    onClick={() => {
+                      if (!PaginateLoading) {
+                        pagination();
+                      }
+                    }}
+                  >
+                    {PaginateLoading ? (
+                      <div className="shop__items-container__load-more__loading"></div>
+                    ) : (
+                      "load more"
+                    )}
+                  </button>
+                )}
+              </div>
+            )}
+          </>
         )}
       </div>
       <div

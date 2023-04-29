@@ -12,9 +12,8 @@ import { useForm } from "react-hook-form";
 
 function Reviews({ id, totalRatings, setItem }) {
   const { user } = useContext(UserContext);
-  const { reviews: userReviews, setReviews: setUserReviews } = useContext(
-    ReviewsContext
-  );
+  const { reviews: userReviews, setReviews: setUserReviews } =
+    useContext(ReviewsContext);
   const { userCount, setUserCount } = useContext(UserCountContext);
   const { hideReviews, setHideReviews } = useContext(HideReviewsContent);
   const { orders } = useContext(OrdersContext);
@@ -235,7 +234,11 @@ function Reviews({ id, totalRatings, setItem }) {
       });
   };
 
-  const { register, handleSubmit, errors } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
 
   useEffect(() => {
     if (typeof errors.review !== "undefined") {
@@ -392,7 +395,7 @@ function Reviews({ id, totalRatings, setItem }) {
             <div className="item-page__reviews-container__edit__select">
               <select
                 name="rating"
-                ref={register}
+                {...register("rating")}
                 defaultValue={
                   typeof userReview !== "undefined" ? userReview.rating : "1"
                 }
@@ -413,7 +416,7 @@ function Reviews({ id, totalRatings, setItem }) {
               name="review"
               id="text-area"
               placeholder="Type here...."
-              ref={register({ required: "reviews are required" })}
+              {...register("review", { required: "reviews are required" })}
               defaultValue={
                 typeof userReview !== "undefined" ? userReview.review : ""
               }

@@ -1,13 +1,14 @@
 import React, { useContext, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import axios from "axios";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { UserContext, PathContext } from "../../App";
 import "./SignUpAndSignIn.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 function SignIn() {
-  const history = useHistory();
+  // const history = useHistory();
+  const navigate = useNavigate();
   const { setUser } = useContext(UserContext);
   const { path } = useContext(PathContext);
 
@@ -15,7 +16,12 @@ function SignIn() {
 
   const [failed, setFailed] = useState(false);
 
-  const { register, handleSubmit, errors, trigger } = useForm({});
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    trigger,
+  } = useForm({});
 
   const [loading, setLoading] = useState(false);
 
@@ -34,7 +40,8 @@ function SignIn() {
         }
         setUser(res.data.user);
         setLoading(false);
-        history.replace(path);
+        // history.replace(path);
+        navigate(path, { replace: true });
       })
       .catch((err) => {
         setFailed(true);
@@ -78,7 +85,7 @@ function SignIn() {
             <input
               name="email"
               type="text"
-              ref={register({
+              {...register("email", {
                 pattern: {
                   value: /^\w{2,}@\w{2,}\.\w{2,}(\.\w{2,})?$/,
                   message: "invalid email address",
@@ -113,7 +120,7 @@ function SignIn() {
               <input
                 name="password"
                 type={hidePassword ? "password" : "text"}
-                ref={register({
+                {...register("password", {
                   required: "required",
                 })}
               />

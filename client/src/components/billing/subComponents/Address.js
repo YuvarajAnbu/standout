@@ -67,7 +67,12 @@ function Address({
     showShippingForm,
   ]);
 
-  const { register, handleSubmit, errors, setValue } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+  } = useForm();
 
   const onSubmit = (data) => {
     if (typeof data.billing === "undefined") {
@@ -81,22 +86,28 @@ function Address({
 
     if (!showBillingForm) {
       delete data.addressBilling;
-      data.billing = billingDetails.address.billing;
+      if (billingDetails.address.billing) {
+        data.billing = billingDetails.address.billing;
+      } else {
+        data.billing = data.shipping;
+      }
     }
-
     let trimmedData = {};
 
     Object.keys(data).forEach((el) => {
       trimmedData[el] = {};
-      Object.keys(data[el]).forEach((e) => {
-        if (typeof data[el][e] === "string") {
-          trimmedData[el][e] = data[el][e].trim();
-          setValue(`${el}.${e}`, data[el][e].trim());
-        } else {
-          trimmedData[el][e] = data[el][e];
-          setValue(`${el}.${e}`, data[el][e]);
-        }
-      });
+
+      if (data[el]) {
+        Object.keys(data[el]).forEach((e) => {
+          if (typeof data[el][e] === "string") {
+            trimmedData[el][e] = data[el][e].trim();
+            setValue(`${el}.${e}`, data[el][e].trim());
+          } else {
+            trimmedData[el][e] = data[el][e];
+            setValue(`${el}.${e}`, data[el][e]);
+          }
+        });
+      }
     });
 
     setBillingDetails((prev) => {
@@ -232,9 +243,8 @@ function Address({
                   };
                 });
                 if (addresses.length >= 1) {
-                  const radioButtons = document.querySelectorAll(
-                    "#radio-button"
-                  );
+                  const radioButtons =
+                    document.querySelectorAll("#radio-button");
                   radioButtons.forEach((el) => {
                     el.checked = false;
                   });

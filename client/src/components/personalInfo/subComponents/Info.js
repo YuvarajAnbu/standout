@@ -36,7 +36,7 @@ function Info({
             <input
               autoFocus
               name="name"
-              ref={register({
+              {...register("name", {
                 pattern: {
                   value: /^[\w ]{0,}[\w]{2,}[\w ]{0,}$/,
                   message: "should be more than 2 letters",
@@ -99,7 +99,7 @@ function Info({
               type="text"
               defaultValue={user.email}
               autoFocus
-              ref={register({
+              {...register("email", {
                 pattern: {
                   value: /^\w{2,}@\w{2,}\.\w{2,}(\.\w{2,})?$/,
                   message: "Invalid Email Address",
@@ -171,9 +171,10 @@ function Info({
               <input
                 name="password"
                 type={hidePassword ? "password" : "text"}
-                ref={register({
+                {...register("password", {
                   pattern: {
-                    value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9\s])[A-Za-z\d\W_]{8,}$/,
+                    value:
+                      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9\s])[A-Za-z\d\W_]{8,}$/,
                     message:
                       "Should be more than 8 Letters and contain atleast 1 Upper case, Lower case, Number and symbol",
                   },
@@ -249,7 +250,7 @@ function Info({
                   <input
                     name="verifyPassword"
                     type={hidePassword ? "password" : "text"}
-                    ref={register({
+                    {...register("verifyPassword", {
                       required: "Required",
                     })}
                     onChange={(e) => {

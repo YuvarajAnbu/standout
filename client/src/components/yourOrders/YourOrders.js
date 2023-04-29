@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Link, useLocation, useHistory } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
   UserContext,
@@ -13,7 +13,8 @@ import Order from "./subComponents/Order";
 
 function YourOrders() {
   const location = useLocation();
-  const history = useHistory();
+  // const history = useHistory();
+  const navigate = useNavigate();
   const { user } = useContext(UserContext);
   const { orders: userOrders } = useContext(OrdersContext);
   const { hideOrders, setHideOrders } = useContext(HideOrdersContext);
@@ -184,7 +185,8 @@ function YourOrders() {
           <div
             className="your-orders__tool-tip-container__black-box"
             onClick={() => {
-              history.goBack();
+              // history.goBack();
+              navigate(-1);
             }}
           ></div>
         </div>
@@ -195,7 +197,8 @@ function YourOrders() {
             <p>No orders found. Check your order-id and try again</p>
             <button
               onClick={() => {
-                history.push("/");
+                // history.push("/");
+                navigate("/");
               }}
             >
               ok
@@ -204,7 +207,8 @@ function YourOrders() {
           <div
             className="your-orders__tool-tip-container__black-box"
             onClick={() => {
-              history.goBack();
+              // history.goBack();
+              navigate(-1);
             }}
           ></div>
         </div>

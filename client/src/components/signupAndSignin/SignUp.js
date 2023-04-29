@@ -2,18 +2,25 @@ import React, { useContext, useState, useEffect } from "react";
 import "./SignUpAndSignIn.css";
 import { useForm } from "react-hook-form";
 import axios from "axios";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { UserContext, PathContext } from "../../App";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 function SignUp() {
-  const history = useHistory();
+  // const history = useHistory();
+  const navigate = useNavigate();
+
   const { setUser } = useContext(UserContext);
   const { path } = useContext(PathContext);
 
   const [hidePassword, setHidePassword] = useState(true);
 
-  const { register, handleSubmit, errors, trigger } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    trigger,
+  } = useForm();
 
   const [loading, setLoading] = useState(false);
 
@@ -38,7 +45,8 @@ function SignUp() {
           }
           setUser(res.data.user);
           setLoading(false);
-          history.replace(path);
+          // history.replace(path);
+          navigate(path, { replace: true });
         }
       })
       .catch((err) => {
@@ -82,7 +90,7 @@ function SignUp() {
               </label>
               <input
                 name="firstName"
-                ref={register({
+                {...register("firstName", {
                   pattern: {
                     value: /^\w{2,}$/,
                     message: "Should be 2 or more than 2 letters",
@@ -106,7 +114,7 @@ function SignUp() {
               </label>
               <input
                 name="lastName"
-                ref={register({
+                {...register("lastName", {
                   pattern: {
                     value: /^\w{2,}$/,
                     message: "Should be 2 or more than 2 letters",
@@ -132,7 +140,7 @@ function SignUp() {
             <input
               name="email"
               type="text"
-              ref={register({
+              {...register("email", {
                 pattern: {
                   value: /^\w{2,}@\w{2,}\.\w{2,}(\.\w{2,})?$/,
                   message: "invalid email address",
@@ -167,9 +175,10 @@ function SignUp() {
               <input
                 name="password"
                 type={hidePassword ? "password" : "text"}
-                ref={register({
+                {...register("password", {
                   pattern: {
-                    value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9\s])[A-Za-z\d\W_]{8,}$/,
+                    value:
+                      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9\s])[A-Za-z\d\W_]{8,}$/,
                     message:
                       "Should be more than 8 Letters and contain atleast 1 Upper case, Lower case, Number and symbol",
                   },

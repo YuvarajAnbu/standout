@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
+import { imgPrefixContext } from "../../../App";
 // import axios from "axios";
 
 function Order({ el, setOrders, setSuccessMsgs, setHideOrders, colors }) {
+  const imgPrefix = useContext(imgPrefixContext);
   const [showAddress, setShowAddress] = useState(false);
 
   const [loadingButton, setLoadingButton] = useState(false);
@@ -181,7 +183,7 @@ function Order({ el, setOrders, setSuccessMsgs, setHideOrders, colors }) {
               <div className="your-orders__orders-container__order__products-container__product-container__product__img">
                 <Link to={`/item/${e._id}`}>
                   <img
-                    src={e.image}
+                    src={imgPrefix(100) + e.image}
                     alt={e.name}
                     onError={(e) => {
                       e.target.src = "/images/imgFailed.jpg";

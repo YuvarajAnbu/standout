@@ -1,13 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import SwiperCore, { Navigation } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { imgPrefixContext } from "../../../App";
 
 SwiperCore.use([Navigation]);
 
 function BestSeller() {
+  const imgPrefix = useContext(imgPrefixContext);
   const [items, setItems] = useState([]);
 
   const limit = 9;
@@ -24,7 +26,7 @@ function BestSeller() {
         setItems(res.data.products);
       })
       .catch((err) => {
-        console.log(err);
+        console.log(err.message);
       });
   }, [limit]);
 
@@ -95,7 +97,7 @@ function BestSeller() {
                   <div className="image-container">
                     <Link to={`/item/${el._id}`}>
                       <img
-                        src={el.stock[0].images[0]}
+                        src={imgPrefix(200) + el.stock[0].images[0]}
                         alt={el.name}
                         style={{ opacity: 0 }}
                         onLoad={(e) => {

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { OrdersContext } from "../../../App";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 function Card({
   cart,
@@ -15,14 +16,15 @@ function Card({
   const [scriptLoaded, setScriptLoaded] = useState(false);
 
   const [hide, setHide] = useState(true);
+  const [error, setError] = useState("");
 
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!scriptLoaded) {
       const links = [
-        "https://js.braintreegateway.com/web/3.65.0/js/client.min.js",
-        "https://js.braintreegateway.com/web/3.65.0/js/hosted-fields.min.js",
+        "https://js.braintreegateway.com/web/3.92.1/js/client.min.js",
+        "https://js.braintreegateway.com/web/3.92.1/js/hosted-fields.min.js",
       ];
 
       links.forEach((link, index) => {
@@ -104,6 +106,7 @@ function Card({
                           payload
                         ) {
                           if (tokenizeErr) {
+                            setError("Invalid card Details");
                             console.error(tokenizeErr);
                             setLoading(false);
                             return;
@@ -157,6 +160,8 @@ function Card({
                               setOrderId(orders.length + 1);
                             })
                             .catch((err) => {
+                              console.log(err);
+                              setError("Something went worng please try again");
                               setLoading(false);
                               setPaymentFailed(true);
                             });
@@ -172,7 +177,7 @@ function Card({
         })
 
         .catch((err) => {
-          console.log(err);
+          console.log(err.message);
         });
     }
   }, [
@@ -205,6 +210,16 @@ function Card({
         }
         id="hosted-fields-form"
       >
+        <p
+          style={{ marginTop: "10px" }}
+          className="billing__checkout__content__container__form__input-container__error-msg"
+        >
+          {error && (
+            <span>
+              <FontAwesomeIcon icon="circle" className="icon" /> {error}
+            </span>
+          )}
+        </p>
         <div className="billing__checkout__content__container__form__input-container">
           <label htmlFor="card-number">
             card number <span>*</span>

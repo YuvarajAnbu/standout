@@ -52,7 +52,7 @@ function AddressShipping({
               </label>
               <input
                 name="shipping.firstName"
-                ref={register({
+                {...register("shipping.firstName", {
                   pattern: {
                     value: /^[\w ]{0,}[\w]{2,}[\w ]{0,}$/,
                     message: "Should only be 2 or more than 2 letters",
@@ -78,7 +78,7 @@ function AddressShipping({
               </label>
               <input
                 name="shipping.lastName"
-                ref={register({
+                {...register("shipping.lastName", {
                   pattern: {
                     value: /^[\w ]{0,}[\w]{2,}[\w ]{0,}$/,
                     message: "Should only be 2 or more than 2 letters",
@@ -105,7 +105,7 @@ function AddressShipping({
             </label>
             <input
               name="shipping.streetAddress"
-              ref={register({
+              {...register("shipping.streetAddress", {
                 pattern: {
                   value: /^[\w ]{0,}[\w/d]{2,}[\w ]{0,}$/,
                   message: "Should only be 2 or more than 2 numbers or letters",
@@ -131,7 +131,7 @@ function AddressShipping({
             </label>
             <input
               name="shipping.extendedAddress"
-              ref={register({
+              {...register("shipping.extendedAddress", {
                 pattern: {
                   value: /^[\w ]{0,}[\w/d]{2,}[\w ]{0,}$/,
                   message: "Should only be 2 or more than 2 numbers or letters",
@@ -157,7 +157,7 @@ function AddressShipping({
               </label>
               <input
                 name="shipping.postalCode"
-                ref={register({
+                {...register("shipping.postalCode", {
                   pattern: {
                     value: /^\d{5}([-]?\d{4})?$/,
                     message: "Invalid Postal Code",
@@ -183,7 +183,7 @@ function AddressShipping({
               </label>
               <input
                 name="shipping.locality"
-                ref={register({
+                {...register("shipping.locality", {
                   pattern: {
                     value: /^[\w ]{0,}[\w]{2,}[\w ]{0,}$/,
                     message:
@@ -212,7 +212,7 @@ function AddressShipping({
             <div className="billing__checkout__content__container__form__input-container__select-container">
               <select
                 name="shipping.region"
-                ref={register}
+                {...register("shipping.region")}
                 defaultValue={billingDetails.address.shipping.region}
               >
                 {usStates.map((el, index) => (
@@ -238,7 +238,9 @@ function AddressShipping({
                 type="radio"
                 name="addressShipping"
                 value={index}
-                ref={register({ required: "Address cannot be empty" })}
+                {...register("addressShipping", {
+                  required: "Address cannot be empty",
+                })}
                 onClick={(e) => {
                   delete el._id;
                   if (hideBillingAddress) {

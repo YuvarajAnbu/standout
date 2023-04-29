@@ -6,10 +6,11 @@ import { UserContext, StateContext } from "../../App";
 import "./PersonalInfo.css";
 import Address from "./subComponents/Address";
 import Info from "./subComponents/Info";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useHistory, useNavigate } from "react-router-dom";
 
 function PersonalInfo() {
-  const history = useHistory();
+  // const history = useHistory();
+  const navigate = useNavigate();
   const { user, setUser } = useContext(UserContext);
   const usStates = useContext(StateContext);
 
@@ -82,7 +83,7 @@ function PersonalInfo() {
   const {
     register,
     handleSubmit,
-    errors,
+    formState: { errors },
     watch,
     control,
     setValue,
@@ -154,7 +155,8 @@ function PersonalInfo() {
       <div
         className="personal-info__tool-tip-container__black-box"
         onClick={() => {
-          history.goBack();
+          // history.goBack();
+          navigate(-1);
         }}
       ></div>
     </div>

@@ -1,6 +1,13 @@
-import React, { useRef, useState, useEffect, useCallback } from "react";
+import React, {
+  useRef,
+  useState,
+  useEffect,
+  useCallback,
+  useContext,
+} from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import SizeRemainingInputs from "./SizeRemainingInputs";
+import { imgPrefixContext } from "../../App";
 
 function StockBox({
   control,
@@ -17,6 +24,7 @@ function StockBox({
   append,
   remove,
 }) {
+  const imgPrefix = useContext(imgPrefixContext);
   const colorBox = useRef(null);
   const optionsBox = useRef(null);
 
@@ -50,7 +58,7 @@ function StockBox({
     <div className="upload__form__stocks-box__stocks-container__stock">
       <input
         name={`stock[${index}]._id`}
-        ref={register()}
+        {...register(`stock[${index}]._id`)}
         defaultValue={typeof field._id === "string" ? field._id : field.id}
         type="hidden"
       />
@@ -105,7 +113,7 @@ function StockBox({
                     className="upload__form__stocks-box__stocks-container__stock__drop-zone__images-container__images__image"
                   >
                     <img
-                      src={el}
+                      src={imgPrefix(40) + el}
                       alt="product"
                       onError={(e) => {
                         e.target.src = "/images/imgFailed.jpg";
@@ -135,6 +143,26 @@ function StockBox({
           <input
             type="file"
             multiple
+            onInput={(ev) => {
+              for (var i = 0; i < ev.target.files.length; i++) {
+                const reader = new FileReader();
+
+                reader.onload = (e) => {
+                  setImages((prev) => {
+                    const arr =
+                      typeof prev[field._id] === "undefined"
+                        ? [reader.result]
+                        : prev[field._id].concat(reader.result);
+
+                    return {
+                      ...prev,
+                      [field._id]: arr,
+                    };
+                  });
+                };
+                reader.readAsDataURL(ev.target.files[i]);
+              }
+            }}
             onChange={(ev) => {
               for (var i = 0; i < ev.target.files.length; i++) {
                 const reader = new FileReader();
@@ -156,7 +184,7 @@ function StockBox({
               }
             }}
             name={`stock[${index}].images`}
-            ref={register()}
+            {...register(`stock[${index}].images`)}
             defaultValue={field.images}
           />
         </div>
@@ -229,7 +257,7 @@ function StockBox({
           <input
             name={`stock[${index}].color`}
             type="hidden"
-            ref={register()}
+            {...register(`stock[${index}].color`)}
             defaultValue={colorValue[1]}
           />
         </div>
@@ -268,7 +296,7 @@ function StockBox({
           className="upload__form__button-container__add-button"
           onClick={() => {
             append({
-              color: "",
+              color: colors[0][1],
               sizeRemaining: [{ size: "", remaining: "" }],
             });
           }}

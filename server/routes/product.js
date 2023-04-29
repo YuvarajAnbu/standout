@@ -462,7 +462,7 @@ router.get("/reviews", auth, async (req, res) => {
       }
 
       reviews = await Product.aggregate([
-        { $match: { _id: mongoose.Types.ObjectId(productId) } },
+        { $match: { _id: new mongoose.Types.ObjectId(productId) } },
         {
           $project: {
             _id: 0,
@@ -471,7 +471,10 @@ router.get("/reviews", auth, async (req, res) => {
                 input: "$reviews",
                 as: "review",
                 cond: {
-                  $eq: ["$$review.user", mongoose.Types.ObjectId(req.userId)],
+                  $eq: [
+                    "$$review.user",
+                    new mongoose.Types.ObjectId(req.userId),
+                  ],
                 },
               },
             },
@@ -494,7 +497,7 @@ router.get("/reviews", auth, async (req, res) => {
       reviews[0].purchased = purchased;
     } else {
       reviews = await Product.aggregate([
-        { $match: { _id: mongoose.Types.ObjectId(productId) } },
+        { $match: { _id: new mongoose.Types.ObjectId(productId) } },
         {
           $project: {
             _id: 0,
@@ -759,7 +762,7 @@ router.get("/:id", async (req, res) => {
     const product = await Product.aggregate([
       {
         $match: {
-          _id: mongoose.Types.ObjectId(id),
+          _id: new mongoose.Types.ObjectId(id),
         },
       },
       {
@@ -782,6 +785,7 @@ router.get("/:id", async (req, res) => {
 
     res.send(product[0]);
   } catch (err) {
+    console.log(err);
     res.sendStatus(400);
   }
 });
@@ -903,7 +907,7 @@ router.get("/:id", async (req, res) => {
 //     for (let i = 0; i < product.stock.length; i++) {
 //       for (let k = 0; k < product.stock[i].images.length; k++) {
 //         const a = await cloudinary.uploader.destroy(
-//           product.stock[i].images[k].split("/")[7].split(".")[0]
+//           product.stock[i].images[k].split(".")[0]
 //         );
 //       }
 //     }
@@ -916,5 +920,37 @@ router.get("/:id", async (req, res) => {
 //     res.sendStatus(400);
 //   }
 // });
+
+// update cloudinary image link to cloudinary image id
+
+router.put("/updateimages", async (req, res) => {
+  console.log("update");
+  try {
+    // const products = await Product.find({}, "stock");
+
+    // products.forEach((el, i) => {
+    //   el.stock = el.stock.map((e) => {
+    //     e.images = e.images.map((f) => (f.split("/")[7] ? f.split("/")[7] : f));
+    //     return e;
+    //   });
+    //   let save = el.save();
+    //   console.log(save, i);
+    // });
+
+    // const orders = await Order.find({}, "items");
+
+    // orders.forEach(async (el, i) => {
+    //   items = el.items.map((e) => {
+    //     e.image = e.image.split("/")[7] ? e.image.split("/")[7] : e.image;
+    //     return e;
+    //   });
+    //   const update = await Order.findByIdAndUpdate(el._id, { items });
+    //   console.log(i);
+    // });
+    res.send("success");
+  } catch (err) {
+    res.status(400).send(err.message);
+  }
+});
 
 module.exports = router;

@@ -120,10 +120,28 @@ function StockBox({
           <input
             type="file"
             multiple
+            onInput={(ev) => {
+              for (var i = 0; i < ev.target.files.length; i++) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                  setImages((prev) => {
+                    const arr =
+                      typeof prev[field.id] == "undefined"
+                        ? [reader.result]
+                        : prev[field.id].concat(reader.result);
+
+                    return {
+                      ...prev,
+                      [field.id]: arr,
+                    };
+                  });
+                };
+                reader.readAsDataURL(ev.target.files[i]);
+              }
+            }}
             onChange={(ev) => {
               for (var i = 0; i < ev.target.files.length; i++) {
                 const reader = new FileReader();
-
                 reader.onload = (e) => {
                   setImages((prev) => {
                     const arr =
@@ -141,8 +159,7 @@ function StockBox({
               }
             }}
             name={`stock[${index}].images`}
-            ref={register()}
-            defaultValue={field.images}
+            {...register(`stock[${index}].images`)}
           />
         </div>
       </div>
@@ -213,7 +230,7 @@ function StockBox({
         <input
           name={`stock[${index}].color`}
           type="hidden"
-          ref={register()}
+          {...register(`stock[${index}].color`)}
           defaultValue={colorValue[1]}
         />
         {typeof errors.stock !== "undefined" && (
@@ -257,7 +274,7 @@ function StockBox({
           onClick={() => {
             append({
               image: [],
-              color: "",
+              color: colors[0][1],
               sizeRemaining: [{ size: "", remaining: "" }],
             });
           }}

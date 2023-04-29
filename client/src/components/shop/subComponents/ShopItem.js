@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
+import { imgPrefixContext } from "../../../App";
 
 function ShopItem({ el, stockIndex, index, setStockIndex }) {
+  const imgPrefix = useContext(imgPrefixContext);
   const [hideColors, setHideColors] = useState(true);
 
   const sizeArray = (arr) => {
@@ -30,7 +32,7 @@ function ShopItem({ el, stockIndex, index, setStockIndex }) {
       <Link to={`/item/${el._id}`}>
         <div className="shop__items-container__items__item__image-container">
           <img
-            src={el.stock[stockIndex[index]].images[0]}
+            src={imgPrefix(300) + el.stock[stockIndex[index]].images[0]}
             alt={el.name}
             onError={(e) => {
               e.target.src = "/images/imgFailed.jpg";

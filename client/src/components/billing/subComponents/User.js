@@ -3,7 +3,11 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 
 function User({ hidden, setHidden, billingDetails, setBillingDetails }) {
-  const { register, handleSubmit, errors } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
 
   const [edited, setEdited] = useState(false);
 
@@ -49,7 +53,7 @@ function User({ hidden, setHidden, billingDetails, setBillingDetails }) {
             </label>
             <input
               name="firstName"
-              ref={register({
+              {...register("firstName", {
                 pattern: {
                   value: /^\w{2,}$/,
                   message: "Should be 2 or more than 2 letters",
@@ -71,7 +75,7 @@ function User({ hidden, setHidden, billingDetails, setBillingDetails }) {
             </label>
             <input
               name="lastName"
-              ref={register({
+              {...register("lastName", {
                 pattern: {
                   value: /^\w{2,}$/,
                   message: "Should be 2 or more than 2 letters",
@@ -95,7 +99,7 @@ function User({ hidden, setHidden, billingDetails, setBillingDetails }) {
           <input
             name="email"
             type="text"
-            ref={register({
+            {...register("email", {
               pattern: {
                 value: /^\w{2,}@\w{2,}\.\w{2,}(\.\w{2,})?$/,
                 message: "Invalid Email Address",

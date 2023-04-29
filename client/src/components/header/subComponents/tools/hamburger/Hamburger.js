@@ -27,12 +27,12 @@ function Hamburger({ setBlackBox, clicked, setClicked, windowWidth }) {
   }, [setBlackBox]);
 
   useEffect(() => {
-    document.querySelector("header .black-box").addEventListener("click", hide);
+    const black = document.querySelector("header .black-box");
+    if (black) black.addEventListener("click", hide);
 
-    return () =>
-      document
-        .querySelector("header .black-box")
-        .removeEventListener("click", hide);
+    return () => {
+      if (black) black.removeEventListener("click", hide);
+    };
   }, [hide]);
 
   return (

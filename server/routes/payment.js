@@ -146,15 +146,23 @@ router.post("/paypal", auth, async (req, res) => {
     if (!transaction.success) {
       throw new Error();
     }
-    // const order = {
+    const order = {
+      customer: transaction.transaction.customer,
+      amount: transaction.transaction.amount,
+      shippingAddress: transaction.transaction.shipping,
+      billingAddress: transaction.transaction.shipping,
+    };
+
+    // const order = new Order({
+    //   items: cart,
+    //   transactionId: transaction.transaction.id,
     //   customer: transaction.transaction.customer,
     //   amount: transaction.transaction.amount,
     //   shippingAddress: transaction.transaction.shipping,
-    //   billingAddress: transaction.transaction.shipping,
-    // };
+    //   billingAddress: transaction.transaction.billing,
+    // });
 
     // await order.save();
-
     // const date = new Date();
 
     // const month = Number(`${date.getFullYear()}${date.getMonth() + 1}`);
@@ -171,6 +179,7 @@ router.post("/paypal", auth, async (req, res) => {
     //   const product = await Product.findById(ids[i], "salesPerMonth sales");
 
     //   product.sales = product.sales + 1;
+
     //   if (product.salesPerMonth.some((el) => el.month === month)) {
     //     product.salesPerMonth.forEach((el) => {
     //       if (el.month === month) {
@@ -183,6 +192,7 @@ router.post("/paypal", auth, async (req, res) => {
 
     //   await product.save();
     // }
+
     // if (typeof req.userId !== "undefined") {
     //   await User.updateOne(
     //     { _id: req.userId },
@@ -192,6 +202,7 @@ router.post("/paypal", auth, async (req, res) => {
 
     res.send({ order: order });
   } catch (err) {
+    console.log(err);
     res.sendStatus(500);
   }
 });

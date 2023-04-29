@@ -16,6 +16,7 @@ function Filter({
   noResults,
   setLastClicked,
   setUpdate,
+  hide,
 }) {
   const colors = useContext(ColorsContext);
 
@@ -36,7 +37,7 @@ function Filter({
 
   return itemStock.colors.length <= 0 ? (
     <div
-      style={noResults ? { opacity: "0", pointerEvents: "none" } : {}}
+      style={noResults || hide ? { opacity: "0", pointerEvents: "none" } : {}}
       className={
         showFilters
           ? "shop__loading__container shop__loading__container--filter shop__loading__container--filter--active"
@@ -64,6 +65,7 @@ function Filter({
     </div>
   ) : (
     <div
+      style={hide ? { opacity: "0", pointerEvents: "none" } : {}}
       className={
         showFilters
           ? "shop__filters-container shop__filters-container--active"

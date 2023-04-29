@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useContext } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { UserContext } from "../../App";
 import "./UpdateOrder.css";
 
 function UpdateOrder() {
-  const history = useHistory();
+  // const history = useHistory();
+  const navigate = useNavigate();
 
   const [input, setInput] = useState("");
   const { user } = useContext(UserContext);
@@ -75,16 +76,18 @@ function UpdateOrder() {
             throw new Error();
           }
           if (res.data !== "admin") {
-            history.push(404);
+            // history.push(404);
+            navigate("/404");
           }
         })
         .catch((err) => {
           console.log(err);
         });
     } else {
-      history.replace("/404");
+      // history.replace("/404");
+      navigate("/404", { replace: true });
     }
-  }, [user.name, history]);
+  }, [user.name, navigate]);
 
   const getorders = () => {
     setLoading(true);

@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
-import { useParams, useHistory } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useForm, useFieldArray } from "react-hook-form";
 import axios from "axios";
 import "../upload/UploadItem.css";
@@ -15,7 +15,8 @@ import StockBox from "./StockBox";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 function EditProduct() {
-  const history = useHistory();
+  // const history = useHistory();
+  let navigate = useNavigate();
   const [item, setItem] = useState({});
 
   const { uploadOptions } = useContext(ProductsContext);
@@ -89,24 +90,28 @@ function EditProduct() {
             throw new Error();
           }
           if (res.data !== "admin") {
-            history.push(404);
+            // history.push(404);
+            navigate("/404");
           }
         })
         .catch((err) => {
           console.log(err);
-          history.push(404);
+          // history.push(404);
+          navigate("/404");
         });
     } else {
-      history.replace("/404");
+      // history.replace("/404");
+      navigate("/404", { replace: true });
     }
-  }, [user.name, history]);
+  }, [user.name, navigate]);
 
   useEffect(() => {
     if (id.length < 20 || hideProducts.includes(id)) {
       const product = userProducts.filter((e) => e._id === id);
 
       if (product.length === 0) {
-        history.replace("/404");
+        // history.replace("/404");
+        navigate("/404", { replace: true });
       } else {
         setItem(product[0]);
       }
@@ -118,22 +123,24 @@ function EditProduct() {
             throw new Error();
           }
           if (typeof res.data.name === "undefined") {
-            history.replace("/404");
+            // history.replace("/404");
+            navigate("/404", { replace: true });
           } else {
             setItem(res.data);
           }
         })
         .catch((err) => {
-          history.replace("/404");
+          // history.replace("/404");
+          navigate("/404", { replace: true });
           console.log(err);
         });
     }
-  }, [id, userProducts, hideProducts, history]);
+  }, [id, userProducts, hideProducts, navigate]);
 
   const {
     register,
     handleSubmit,
-    errors,
+    formState: { errors },
     control,
     getValues,
     setValue,
@@ -152,12 +159,16 @@ function EditProduct() {
             setImages((prev) => {
               return { ...prev, [el._id]: el.images };
             });
-            append({ color: el.color, _id: el._id });
+            append({
+              color: el.color,
+              _id: el._id,
+              sizeRemaining: el.sizeRemaining,
+            });
           }, 1);
         });
       }
     }
-  }, [item, append, setImages, fields.length]);
+  }, [item, append, fields.length]);
 
   const onSubmit = async (data) => {
     setLoading(true);
@@ -247,7 +258,7 @@ function EditProduct() {
             autoFocus
             placeholder="eg.  button down shirts for men"
             id="inputName"
-            ref={register({
+            {...register("inputName", {
               pattern: {
                 value: /^[\w/d ]{0,}[\w-/d]{2,}[\w-/d ]{0,}$/,
                 message: "should only be 2 or more than 2 letters",
@@ -270,7 +281,7 @@ function EditProduct() {
           <input
             name="price"
             placeholder="25.55 or 25 (in usd)"
-            ref={register({
+            {...register("price", {
               required: "required",
               pattern: {
                 value: /^(\d+)(\.\d+)?$/,
@@ -296,7 +307,7 @@ function EditProduct() {
               <select
                 name="catagory"
                 onChange={(e) => setCatagory(e.target.value)}
-                ref={register}
+                {...register("catagory")}
                 defaultValue={item.catagory}
               >
                 <option value="women">women</option>
@@ -311,7 +322,11 @@ function EditProduct() {
               type <span>*</span>
             </label>
             <div className="upload__form__input-container__select-container">
-              <select name="type" ref={register} defaultValue={item.type}>
+              <select
+                name="type"
+                {...register("type")}
+                defaultValue={item.type}
+              >
                 {uploadOptions[catagory].map((el, l) => (
                   <option key={l} value={el.toLowerCase()}>
                     {el}

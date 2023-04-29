@@ -6,6 +6,7 @@ import {
   UserContext,
   OrdersContext,
   ColorsContext,
+  imgPrefixContext,
 } from "../../App";
 import "./Checkout.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -15,6 +16,7 @@ function Checkout() {
   const { user } = useContext(UserContext);
   const { orders, setOrders } = useContext(OrdersContext);
   const colors = useContext(ColorsContext);
+  const imgPrefix = useContext(imgPrefixContext);
 
   const [scriptLoaded, setScriptLoaded] = useState(false);
 
@@ -43,8 +45,8 @@ function Checkout() {
   useEffect(() => {
     if (!scriptLoaded) {
       const links = [
-        "https://js.braintreegateway.com/web/3.65.0/js/client.min.js",
-        "https://js.braintreegateway.com/web/3.65.0/js/paypal-checkout.min.js",
+        "https://js.braintreegateway.com/web/3.92.1/js/client.min.js",
+        "https://js.braintreegateway.com/web/3.92.1/js/paypal-checkout.min.js",
       ];
 
       links.forEach((link, index) => {
@@ -70,11 +72,13 @@ function Checkout() {
               authorization: token.data,
             })
             .then(function (clientInstance) {
+              // Create a PayPal Checkout component.
               return window.braintree.paypalCheckout.create({
                 client: clientInstance,
               });
             })
             .then(function (paypalCheckoutInstance) {
+              // Load the PayPal JS SDK (see Load the PayPal JS SDK section)
               return paypalCheckoutInstance.loadPayPalSDK({
                 currency: "USD",
                 intent: "capture",
@@ -150,6 +154,7 @@ function Checkout() {
               setPaypalLoading(false);
             })
             .catch((err) => {
+              // Handle component creation error
               console.error(err);
             });
         }
@@ -177,12 +182,7 @@ function Checkout() {
         </Link>
       </div>
       <Link to="/">
-        <div
-          className="checkout__tool-tip-container__black-box"
-          onClick={() => {
-            setCart([]);
-          }}
-        ></div>
+        <div className="checkout__tool-tip-container__black-box"></div>
       </Link>
     </div>
   ) : (
@@ -202,11 +202,22 @@ function Checkout() {
                 : `purchase successful. Your orderId is ${orderId}`}
             </p>
             <Link to={typeof user.name !== "undefined" ? "/your-orders" : "/"}>
-              <button>ok</button>
+              <button
+                onClick={() => {
+                  setCart([]);
+                }}
+              >
+                ok
+              </button>
             </Link>
           </div>
           <Link to={typeof user.name !== "undefined" ? "/your-orders" : "/"}>
-            <div className="checkout__tool-tip-container__black-box"></div>
+            <div
+              className="checkout__tool-tip-container__black-box"
+              onClick={() => {
+                setCart([]);
+              }}
+            ></div>
           </Link>
         </div>
       )}
@@ -245,7 +256,7 @@ function Checkout() {
                 <div className="checkout__items-container__items__item__content__img">
                   <Link to={`/item/${el._id}`}>
                     <img
-                      src={el.image}
+                      src={imgPrefix(100) + el.image}
                       alt={el.name}
                       onError={(e) => {
                         e.target.src = "/images/imgFailed.jpg";
@@ -364,7 +375,7 @@ function Checkout() {
             }}
             className={
               paypalLoading
-                ? "checkout__billing-container__button-container__paypal---hidden"
+                ? "checkout__billing-container__button-container__paypal--hidden"
                 : ""
             }
           ></div>

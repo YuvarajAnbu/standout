@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
+import { imgPrefixContext } from "../../../App";
 // import axios from "axios";
 
 function ShopItem({
@@ -11,9 +12,12 @@ function ShopItem({
   // setErrorMsgs,
   setSuccessMsgs,
   setItems,
+  setUpdate,
+  // userProducts,
   setUserProducts,
   setHideProducts,
 }) {
+  const imgPrefix = useContext(imgPrefixContext);
   const [hideColors, setHideColors] = useState(true);
 
   const [loadingButton, setLoadingButton] = useState(false);
@@ -44,7 +48,7 @@ function ShopItem({
     >
       <div className="shop__items-container__items__item__image-container">
         <img
-          src={el.stock[stockIndex[index]].images[0]}
+          src={imgPrefix(300) + el.stock[stockIndex[index]].images[0]}
           alt={el.name}
           onError={(e) => {
             e.target.src = "/images/imgFailed.jpg";
@@ -70,17 +74,18 @@ function ShopItem({
                 onClick={() => {
                   if (!loadingButton) {
                     setLoadingButton(true);
-                    if (el._id.length < 20) {
-                      setUserProducts((prev) =>
-                        prev.filter((e) => e._id !== el._id)
-                      );
-                      setLoadingButton(false);
-                      setSuccessMsgs("item deleted successfully");
-                      setItems((prev) => prev.filter((k) => k._id !== el._id));
-                    } else {
+                    setUserProducts((prev) =>
+                      prev.filter((e) => e._id !== el._id)
+                    );
+                    setLoadingButton(false);
+                    setSuccessMsgs("item deleted successfully");
+                    setItems((prev) => prev.filter((k) => k._id !== el._id));
+
+                    if (el._id.length >= 10)
                       setHideProducts((prev) => [...prev, el._id]);
-                    }
+
                     setHideToolTip(true);
+                    setUpdate((prev) => prev + 1);
                     // axios
                     //   .delete(`/product/delete/${el._id}`)
                     //   .then((res) => {

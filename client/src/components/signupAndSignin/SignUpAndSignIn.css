@@ -1,41 +1,28 @@
 .user-form {
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
   max-width: 977px;
   margin: 50px auto;
 }
-
 .user-form img {
   min-width: 448px;
   width: 448px;
   margin-right: 50px;
 }
-
 .user-form__content__title {
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-pack: justify;
-      -ms-flex-pack: justify;
-          justify-content: space-between;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  justify-content: space-between;
+  align-items: center;
 }
-
 .user-form__content__title__desc h1 {
   font-weight: 500;
   font-size: 20px;
   text-transform: capitalize;
 }
-
 .user-form__content__title__desc p {
   font-size: 13px;
   width: 270px;
   margin-top: 10px;
 }
-
 .user-form__content__title button {
   padding: 10px 20px;
   font-size: 13px;
@@ -45,50 +32,35 @@
   background-color: transparent;
   cursor: pointer;
 }
-
 .user-form__content__title button:hover {
   color: rgba(0, 0, 0, 0.568);
   border: 1px solid rgba(0, 0, 0, 0.568);
 }
-
 .user-form__content__form {
   border-bottom: 1px solid #dadada;
   padding-bottom: 20px;
   width: 430px;
 }
-
 .user-form__content__form__flex {
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
 }
-
 .user-form__content__form__flex > :first-child {
   margin-right: 20px;
 }
-
 .user-form__content__form__input-container {
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column;
+  flex-direction: column;
   margin-top: 15px;
 }
-
 .user-form__content__form__input-container label {
   font-size: 13px;
   color: #696969;
   text-transform: capitalize;
   margin-bottom: 5px;
 }
-
 .user-form__content__form__input-container label span {
   color: #ff0000;
 }
-
 .user-form__content__form__input-container input {
   border: none;
   border-bottom: 1px solid #454545;
@@ -99,45 +71,36 @@
   background-color: transparent;
   max-width: 300px;
 }
-
 .user-form__content__form__input-container input:focus {
   border-bottom: 2px solid black;
 }
-
 .user-form__content__form__input-container__password-container {
   max-width: 300px;
   position: relative;
 }
-
 .user-form__content__form__input-container__password-container input {
   width: 100%;
 }
-
 .user-form__content__form__input-container__password-container .icon {
   position: absolute;
   right: 10px;
   top: 50%;
-  -webkit-transform: translateY(-50%);
-          transform: translateY(-50%);
+  transform: translateY(-50%);
   font-size: 13px;
   cursor: pointer;
-  color: #636363;
+  color: rgb(99, 99, 99);
 }
-
 .user-form__content__form__input-container__error-msg {
   color: #f22626;
   margin: 3px 10px;
   font-size: 13px;
   max-width: 200px;
 }
-
 .user-form__content__form__input-container__error-msg .icon {
   font-size: 6px;
   margin-right: 3px;
-  -webkit-transform: translateY(-30%);
-          transform: translateY(-30%);
+  transform: translateY(-30%);
 }
-
 .user-form__content__form button {
   background-color: black;
   color: white;
@@ -150,71 +113,46 @@
   margin-left: auto;
   margin-top: 20px;
   cursor: pointer;
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  justify-content: center;
+  align-items: center;
 }
-
 .user-form__content__form button:disabled, .user-form__content__form button:hover, .user-form__content__form button:focus {
   background-color: rgba(0, 0, 0, 0.712);
 }
-
 .user-form__content__form__button {
   width: 91px;
   height: 36px;
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  justify-content: center;
+  align-items: center;
   border: 1px solid black !important;
 }
-
 .user-form__content__form__button--loading {
   background-color: white !important;
 }
-
 .user-form__content__form__button__loading {
   width: 15px;
   height: 15px;
   border: double 1px transparent;
   border-radius: 80px;
-  background-image: -webkit-gradient(linear, left top, left bottom, from(white), to(white)), radial-gradient(circle at top, #5e5e5e 30%, black 70%);
-  background-image: linear-gradient(white, white), radial-gradient(circle at top, #5e5e5e 30%, black 70%);
+  background-image: linear-gradient(white, white), radial-gradient(circle at top, rgb(94, 94, 94) 30%, rgb(0, 0, 0) 70%);
   background-origin: border-box;
   background-clip: content-box, border-box;
-  -webkit-animation: spin 2s linear infinite;
-          animation: spin 2s linear infinite;
+  animation: spin 2s linear infinite;
 }
-
 .user-form__content__terms, .user-form__content__signup {
   font-size: 13px;
   margin-top: 10px;
   max-width: 400px;
 }
-
 .user-form__content__terms a, .user-form__content__signup a {
   color: #707070;
   text-transform: capitalize;
 }
-
 .user-form__content__signup {
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-pack: justify;
-      -ms-flex-pack: justify;
-          justify-content: space-between;
+  justify-content: space-between;
 }
 
 @media (max-width: 1000px) {
@@ -225,15 +163,11 @@
     margin: auto;
   }
 }
-
 @media (max-width: 500px) {
   .user-form {
     padding: 0 2%;
     max-width: 100%;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-        -ms-flex-direction: column;
-            flex-direction: column;
+    flex-direction: column;
     margin-top: 30px;
   }
   .user-form__content {
@@ -255,10 +189,6 @@
     margin-top: 30px;
   }
   .user-form__content__form__flex {
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-        -ms-flex-direction: column;
-            flex-direction: column;
+    flex-direction: column;
   }
-}
-/*# sourceMappingURL=SignUpAndSignIn.css.map */
+}/*# sourceMappingURL=SignUpAndSignIn.css.map */

@@ -1,6 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
-import { useHistory } from "react-router-dom";
 import axios from "axios";
 import "./UploadItem.css";
 import {
@@ -12,9 +11,11 @@ import {
 } from "../../App";
 import StockBox from "./StockBox";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useNavigate } from "react-router-dom";
 
 function UploadItem() {
-  const history = useHistory();
+  // const history = useHistory();
+  const navigate = useNavigate();
 
   const { uploadOptions } = useContext(ProductsContext);
   const { user } = useContext(UserContext);
@@ -49,16 +50,18 @@ function UploadItem() {
           if (res.data === "admin") {
             setLoading(false);
           } else {
-            history.push("404");
+            // history.push("404");
+            navigate("/404");
           }
         })
         .catch((err) => {
           console.log(err);
         });
     } else {
-      history.replace("/404");
+      // history.replace("/404");
+      navigate("/404", { replace: true });
     }
-  }, [user.name, history]);
+  }, [user.name, navigate]);
 
   useEffect(() => {
     if (errorMsgs !== "") {
@@ -103,7 +106,7 @@ function UploadItem() {
   const {
     register,
     handleSubmit,
-    errors,
+    formState: { errors },
     control,
     getValues,
     reset,
@@ -115,7 +118,8 @@ function UploadItem() {
       stock: [
         {
           image: [],
-          color: "",
+          color: colors[0][1],
+          sizeRemaining: [{ size: "", remaining: "" }],
         },
       ],
     },
@@ -214,7 +218,7 @@ function UploadItem() {
           <input
             name="name"
             autoFocus
-            ref={register({
+            {...register("name", {
               pattern: {
                 value: /^[\w/d ]{0,}[\w-/d]{2,}[\w-/d ]{0,}$/,
                 message: 'should only be 2 or more than 2 letters, "-"',
@@ -237,7 +241,7 @@ function UploadItem() {
             name="price"
             className="upload__form__input-container__price"
             placeholder="20 or 20.55 (in USD)"
-            ref={register({
+            {...register("price", {
               required: "Required",
               pattern: {
                 value: /^(\d+)(\.\d+)?$/,
@@ -261,7 +265,7 @@ function UploadItem() {
               <select
                 name="catagory"
                 onChange={(e) => setCatagory(e.target.value)}
-                ref={register}
+                {...register("catagory")}
               >
                 <option value="women">women</option>
                 <option value="men">men</option>
@@ -277,7 +281,7 @@ function UploadItem() {
             <div className="upload__form__input-container__select-container">
               <select
                 name="type"
-                ref={register}
+                {...register("type")}
                 onChange={(e) => {
                   setType(e.target.value);
                 }}

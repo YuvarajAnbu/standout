@@ -28,7 +28,7 @@
     }
   }
 
-  .swiper-container {
+  .swiper {
     margin-top: 40px;
     user-select: none;
     .swiper-wrapper {
@@ -61,6 +61,7 @@
             width: 100%;
             position: absolute;
             height: 100%;
+            object-fit: cover;
             top: 0;
             left: 0;
           }

@@ -47,7 +47,7 @@ function AddressBilling({
               </label>
               <input
                 name="billing.firstName"
-                ref={register({
+                {...register("billing.firstName", {
                   pattern: {
                     value: /^[\w ]{0,}[\w]{2,}[\w ]{0,}$/,
                     message: "Should only be 2 or more than 2 letters",
@@ -72,7 +72,7 @@ function AddressBilling({
               </label>
               <input
                 name="billing.lastName"
-                ref={register({
+                {...register("billing.lastName", {
                   pattern: {
                     value: /^[\w ]{0,}[\w]{2,}[\w ]{0,}$/,
                     message: "Should only be 2 or more than 2 letters",
@@ -98,7 +98,7 @@ function AddressBilling({
             </label>
             <input
               name="billing.streetAddress"
-              ref={register({
+              {...register("billing.streetAddress", {
                 pattern: {
                   value: /^[\w ]{0,}[\w/d]{2,}[\w ]{0,}$/,
                   message: "Should only be 2 or more than 2 numbers or letters",
@@ -123,7 +123,7 @@ function AddressBilling({
             </label>
             <input
               name="billing.extendedAddress"
-              ref={register({
+              {...register("billing.extendedAddress", {
                 pattern: {
                   value: /^[\w ]{0,}[\w/d]{2,}[\w ]{0,}$/,
                   message: "Should only be 2 or more than 2 numbers or letters",
@@ -148,7 +148,7 @@ function AddressBilling({
               </label>
               <input
                 name="billing.postalCode"
-                ref={register({
+                {...register("billing.postalCode", {
                   pattern: {
                     value: /^\d{5}([-]?\d{4})?$/,
                     message: "Invalid Postal Code",
@@ -173,7 +173,7 @@ function AddressBilling({
               </label>
               <input
                 name="billing.locality"
-                ref={register({
+                {...register("billing.locality", {
                   pattern: {
                     value: /^[\w ]{0,}[\w/d]{2,}[\w ]{0,}$/,
                     message:
@@ -202,7 +202,7 @@ function AddressBilling({
               <select
                 name="billing.region"
                 placeholder="State / Province"
-                ref={register}
+                {...register("billing.region")}
               >
                 {usStates.map((el, index) => (
                   <option value={el.abbreviation} key={index}>
@@ -226,7 +226,9 @@ function AddressBilling({
                 type="radio"
                 name="addressBilling"
                 value={index}
-                ref={register({ required: "address cannot be empty" })}
+                {...register("billing.region", {
+                  required: "address cannot be empty",
+                })}
                 onClick={() => {
                   delete el._id;
                   setBillingDetails((prev) => {

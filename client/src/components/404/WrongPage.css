@@ -1,57 +1,36 @@
 .wrong-page {
   max-width: 1920px;
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   min-height: 60vh;
   padding: 0 20px;
 }
-
 .wrong-page h1 {
   font-size: 10rem;
   text-align: center;
 }
-
 .wrong-page p {
   text-align: center;
 }
-
 .wrong-page form {
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  justify-content: center;
+  align-items: center;
   margin-top: 50px;
 }
-
 .wrong-page form input {
   border: 1px solid black;
   padding: 10px 10px;
   width: 500px;
 }
-
 .wrong-page form button {
   background-color: black;
   border: none;
   height: 38px;
   width: 38px;
 }
-
 .wrong-page form button .icon {
   cursor: pointer;
 }
@@ -69,5 +48,4 @@
   .wrong-page form input {
     width: 70vw;
   }
-}
-/*# sourceMappingURL=WrongPage.css.map */
+}/*# sourceMappingURL=WrongPage.css.map */

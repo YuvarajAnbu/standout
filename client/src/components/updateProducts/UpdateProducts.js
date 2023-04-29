@@ -11,10 +11,11 @@ import {
   HideProductsContext,
 } from "../../App";
 import pluralize from "pluralize";
-import { Link, useHistory, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 function UpdateProducts() {
-  const history = useHistory();
+  // const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
 
   const { uploadOptions } = useContext(ProductsContext);
@@ -88,16 +89,18 @@ function UpdateProducts() {
             throw new Error();
           }
           if (res.data !== "admin") {
-            history.push(404);
+            // history.push(404);
+            navigate("/404");
           }
         })
         .catch((err) => {
           console.log(err);
         });
     } else {
-      history.replace("/404");
+      // history.replace("/404");
+      navigate("/404", { replace: true });
     }
-  }, [user.name, history]);
+  }, [user.name, navigate]);
 
   useEffect(() => {
     if (window.innerWidth >= 1000 && showFilters) {
@@ -398,7 +401,8 @@ function UpdateProducts() {
           }
           return obj;
         });
-
+        console.log(serverProducts);
+        if (serverProducts.length < 1) setNoResults(true);
         setItems(serverProducts);
         setPage(1);
       })
@@ -408,6 +412,7 @@ function UpdateProducts() {
   }, [filter, catagory, type, userProducts, hideProducts]);
 
   const getFilters = useCallback(() => {
+    console.log(1);
     if (catagory.length > 0 && type.length > 0) {
       if (catagory.includes(";0.hjgbhj") && type.includes(";0.hjgbhj")) {
         setNoResults(true);
@@ -767,6 +772,8 @@ function UpdateProducts() {
                       setSuccessMsgs,
                       setErrorMsgs,
                       setItems,
+                      setUpdate,
+                      userProducts,
                       setUserProducts,
                       setHideProducts,
                     }}

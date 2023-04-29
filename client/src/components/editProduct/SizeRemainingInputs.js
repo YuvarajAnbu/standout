@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useFieldArray } from "react-hook-form";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -8,26 +8,25 @@ function SizeRemainingInputs({
   register,
   errors,
   getValues,
-  item,
 }) {
   const { fields, remove, append } = useFieldArray({
     control,
     name: `stock[${stockIndex}].sizeRemaining`,
   });
 
-  useEffect(() => {
-    if (fields.length < 1) {
-      if (typeof item !== "undefined") {
-        item.sizeRemaining.forEach((el) => {
-          setTimeout(() => {
-            append({ size: el.size, remaining: el.remaining }, false);
-          }, 1);
-        });
-      } else {
-        append({ size: "" }, false);
-      }
-    }
-  }, [append, fields.length, item]);
+  // useEffect(() => {
+  //   if (fields.length < 1) {
+  //     if (typeof item !== "undefined") {
+  //       item.sizeRemaining.forEach((el) => {
+  //         setTimeout(() => {
+  //           append({ size: el.size, remaining: el.remaining }, false);
+  //         }, 1);
+  //       });
+  //     } else {
+  //       append({ size: "" }, false);
+  //     }
+  //   }
+  // }, [append, fields.length, item]);
 
   return (
     <div>
@@ -43,9 +42,12 @@ function SizeRemainingInputs({
               name={`stock[${stockIndex}].sizeRemaining[${index}].size`}
               className="upload__form__input-container__size"
               placeholder="XL or 8 or 7.5"
-              ref={register({
-                required: "required",
-              })}
+              {...register(
+                `stock[${stockIndex}].sizeRemaining[${index}].size`,
+                {
+                  required: "required",
+                }
+              )}
               defaultValue={field.size}
             />
             {typeof errors.stock !== "undefined" && (
@@ -78,13 +80,16 @@ function SizeRemainingInputs({
               name={`stock[${stockIndex}].sizeRemaining[${index}].remaining`}
               placeholder="76"
               className="upload__form__input-container__remaining"
-              ref={register({
-                pattern: {
-                  value: /^\d+$/,
-                  message: "Should be number",
-                },
-                required: "required",
-              })}
+              {...register(
+                `stock[${stockIndex}].sizeRemaining[${index}].remaining`,
+                {
+                  pattern: {
+                    value: /^\d+$/,
+                    message: "Should be number",
+                  },
+                  required: "required",
+                }
+              )}
               defaultValue={field.remaining}
             />
             {typeof errors.stock !== "undefined" && (

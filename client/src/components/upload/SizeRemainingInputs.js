@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useFieldArray } from "react-hook-form";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -14,12 +14,6 @@ function SizeRemainingInputs({
     name: `stock[${stockIndex}].sizeRemaining`,
   });
 
-  useEffect(() => {
-    if (fields.length < 1) {
-      append({ remaining: "" }, false);
-    }
-  }, [append, fields]);
-
   return (
     <div>
       {fields.map((field, index) => (
@@ -34,9 +28,12 @@ function SizeRemainingInputs({
               name={`stock[${stockIndex}].sizeRemaining[${index}].size`}
               className="upload__form__input-container__size"
               placeholder="XL or 8 or 7.5"
-              ref={register({
-                required: "required",
-              })}
+              {...register(
+                `stock[${stockIndex}].sizeRemaining[${index}].size`,
+                {
+                  required: "required",
+                }
+              )}
               defaultValue={field.size}
             />
             {typeof errors.stock !== "undefined" && (
@@ -69,13 +66,16 @@ function SizeRemainingInputs({
               name={`stock[${stockIndex}].sizeRemaining[${index}].remaining`}
               placeholder="76"
               className="upload__form__input-container__remaining"
-              ref={register({
-                pattern: {
-                  value: /^\d+$/,
-                  message: "Should be number",
-                },
-                required: "required",
-              })}
+              {...register(
+                `stock[${stockIndex}].sizeRemaining[${index}].remaining`,
+                {
+                  pattern: {
+                    value: /^\d+$/,
+                    message: "Should be number",
+                  },
+                  required: "required",
+                }
+              )}
               defaultValue={field.remaining}
             />
             {typeof errors.stock !== "undefined" && (

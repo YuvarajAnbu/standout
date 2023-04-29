@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import "swiper/swiper-bundle.min.css";
+import "swiper/css";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import { imgPrefixContext } from "../../../App";
 
 function Trending() {
+  const imgPrefix = useContext(imgPrefixContext);
   const [items, setItems] = useState([]);
   const limit = 9;
 
@@ -20,7 +22,7 @@ function Trending() {
         setItems(res.data.products);
       })
       .catch((err) => {
-        console.log(err);
+        console.log(err.message);
       });
   }, [limit]);
 
@@ -41,8 +43,6 @@ function Trending() {
             spaceBetween={13}
             slidesPerView={2.5}
             grabCursor
-            preloadImages={false}
-            lazy={true}
             autoHeight
             breakpoints={{
               1900: {
@@ -93,7 +93,7 @@ function Trending() {
                   <div className="image-container">
                     <Link to={`/item/${el._id}`}>
                       <img
-                        src={el.stock[0].images[0]}
+                        src={imgPrefix(200) + el.stock[0].images[0]}
                         style={{ opacity: 0 }}
                         onLoad={(e) => {
                           e.target.style.opacity = "1";

@@ -78,7 +78,7 @@ function Address({
         <input
           type="hidden"
           name={`addresses[${index}]._id`}
-          ref={register()}
+          {...register(`addresses[${index}]._id`)}
           defaultValue={field._id}
         />
 
@@ -89,7 +89,7 @@ function Address({
             </label>
             <input
               name={`addresses[${index}].firstName`}
-              ref={register({
+              {...register(`addresses[${index}].firstName`, {
                 pattern: {
                   value: /^\w{2,}$/,
                   message: "Should be 2 or more than 2 letters",
@@ -120,7 +120,7 @@ function Address({
             </label>
             <input
               name={`addresses[${index}].lastName`}
-              ref={register({
+              {...register(`addresses[${index}].lastName`, {
                 pattern: {
                   value: /^\w{2,}$/,
                   message: "Should be 2 or more than 2 letters",
@@ -152,7 +152,7 @@ function Address({
           </label>
           <input
             name={`addresses[${index}].streetAddress`}
-            ref={register({
+            {...register(`addresses[${index}].streetAddress`, {
               minLength: {
                 value: 2,
                 message: "Should be 2 or more than 2 letters",
@@ -183,7 +183,7 @@ function Address({
           </label>
           <input
             name={`addresses[${index}].extendedAddress`}
-            ref={register({
+            {...register(`addresses[${index}].extendedAddress`, {
               minLength: {
                 value: 2,
                 message: "Should be 2 or more than 2 letters",
@@ -214,7 +214,7 @@ function Address({
             </label>
             <input
               name={`addresses[${index}].postalCode`}
-              ref={register({
+              {...register(`addresses[${index}].postalCode`, {
                 pattern: {
                   value: /^\d{5}([-]?\d{4})?$/,
                   message: "Invalid Postal Code",
@@ -245,7 +245,7 @@ function Address({
             </label>
             <input
               name={`addresses[${index}].locality`}
-              ref={register({
+              {...register(`addresses[${index}].locality`, {
                 minLength: {
                   value: 2,
                   message: "Should be 2 or more than 2 letters",
@@ -278,7 +278,7 @@ function Address({
           <div className="personal-info__container__info__pop-up__select-container">
             <select
               name={`addresses[${index}].region`}
-              ref={register()}
+              {...register(`addresses[${index}].region`)}
               defaultValue={field.region}
             >
               {usStates.map((el, index) => (

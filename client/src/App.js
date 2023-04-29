@@ -6,7 +6,7 @@ import React, {
   Suspense,
 } from "react";
 import "./App.css";
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import { Route, BrowserRouter, Routes } from "react-router-dom";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
   faSearch,
@@ -88,6 +88,7 @@ export const HideProductsContext = createContext();
 export const UserCountContext = createContext();
 export const ReviewsContext = createContext();
 export const HideReviewsContent = createContext();
+export const imgPrefixContext = createContext();
 
 function App() {
   library.add(
@@ -129,6 +130,12 @@ function App() {
   const [hideReviews, setHideReviews] = useState([]);
   const [userCount, setUserCount] = useState(0);
 
+  const imgPrefix = (width) => {
+    return `https://res.cloudinary.com/xander-ecommerce/image/upload/c_fit,${
+      width ? `w_${width}` : ""
+    }/`;
+  };
+
   useEffect(() => {
     document.querySelector("body").style.paddingRight = 0;
     document.querySelector("html").style.overflowY = "scroll";
@@ -142,6 +149,7 @@ function App() {
         setLoaded(false);
       })
       .catch((err) => {
+        console.log(err.message);
         setLoaded(false);
       });
 
@@ -172,39 +180,42 @@ function App() {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cart));
-  }, [cart]);
+    if (!loaded) localStorage.setItem("cart", JSON.stringify(cart));
+  }, [cart, loaded]);
 
   useEffect(() => {
-    localStorage.setItem("orders", JSON.stringify(orders));
-  }, [orders]);
+    if (!loaded) localStorage.setItem("orders", JSON.stringify(orders));
+  }, [orders, loaded]);
 
   useEffect(() => {
-    localStorage.setItem("hideOrders", JSON.stringify(hideOrders));
-  }, [hideOrders]);
+    if (!loaded) localStorage.setItem("hideOrders", JSON.stringify(hideOrders));
+  }, [hideOrders, loaded]);
 
   useEffect(() => {
-    localStorage.setItem("userProducts", JSON.stringify(userProducts));
-  }, [userProducts]);
+    if (!loaded)
+      localStorage.setItem("userProducts", JSON.stringify(userProducts));
+  }, [userProducts, loaded]);
 
   useEffect(() => {
-    localStorage.setItem("hideProducts", JSON.stringify(hideProducts));
-  }, [hideProducts]);
+    if (!loaded)
+      localStorage.setItem("hideProducts", JSON.stringify(hideProducts));
+  }, [hideProducts, loaded]);
 
   useEffect(() => {
-    localStorage.setItem("reviews", JSON.stringify(reviews));
-  }, [reviews]);
+    if (!loaded) localStorage.setItem("reviews", JSON.stringify(reviews));
+  }, [reviews, loaded]);
 
   useEffect(() => {
-    localStorage.setItem("hideReviews", JSON.stringify(hideReviews));
-  }, [hideReviews]);
+    if (!loaded)
+      localStorage.setItem("hideReviews", JSON.stringify(hideReviews));
+  }, [hideReviews, loaded]);
 
   useEffect(() => {
-    localStorage.setItem("userCount", JSON.stringify(userCount));
-  }, [userCount]);
+    if (!loaded) localStorage.setItem("userCount", JSON.stringify(userCount));
+  }, [userCount, loaded]);
 
   return (
-    <Router>
+    <BrowserRouter>
       <ErrorBoundary>
         <Suspense
           fallback={
@@ -243,91 +254,129 @@ function App() {
                                 <PathContext.Provider value={{ path, setPath }}>
                                   <StateContext.Provider value={usStates}>
                                     <ColorsContext.Provider value={colors}>
-                                      <Header />
-                                      <Switch>
-                                        <Route path="/" exact>
-                                          <Home />
-                                        </Route>
-                                        <Route path="/signup" exact>
-                                          <SignUp />
-                                        </Route>
-                                        <Route path="/signin" exact>
-                                          <SignIn />
-                                        </Route>
-                                        <Route
-                                          path="/items/:catagory/:type"
-                                          exact
-                                        >
-                                          <Items />
-                                        </Route>
-                                        <Route path="/item/:id" exact>
-                                          <Item />
-                                        </Route>
-                                        <Route path="/checkout" exact>
-                                          <Checkout />
-                                        </Route>
-                                        <Route path="/your-orders" exact>
-                                          <YourOrders />
-                                        </Route>
-                                        <Route path="/orders" exact>
-                                          <YourOrders />
-                                        </Route>
-                                        <Route path="/search" exact>
-                                          <Search />
-                                        </Route>
+                                      <imgPrefixContext.Provider
+                                        value={imgPrefix}
+                                      >
+                                        <Header />
+                                        <Routes>
+                                          <Route
+                                            path="/"
+                                            element={<Home />}
+                                            exact
+                                          />
+                                          <Route
+                                            path="/signup"
+                                            element={<SignUp />}
+                                            exact
+                                          />
+                                          <Route
+                                            path="/signin"
+                                            element={<SignIn />}
+                                            exact
+                                          />
 
-                                        {user.type === "admin" && (
-                                          <Route path="/upload" exact>
-                                            <UploadItem />
-                                          </Route>
-                                        )}
-                                        {user.type === "admin" && (
-                                          <Route path="/update-products" exact>
-                                            <UpdateProducts />
-                                          </Route>
-                                        )}
-                                        {user.type === "admin" && (
-                                          <Route path="/edit-item/:id" exact>
-                                            <EditProduct />
-                                          </Route>
-                                        )}
-                                        {user.type === "admin" && (
-                                          <Route path="/update-order" exact>
-                                            <UpdateOrder />
-                                          </Route>
-                                        )}
-                                        <Route
-                                          path="/terms-and-conditions"
-                                          exact
-                                        >
-                                          <TermsAndConditions />
-                                        </Route>
-                                        <Route path="/private-policy" exact>
-                                          <PrivatePolicy />
-                                        </Route>
-                                        <Route path="/accessibility" exact>
-                                          <Accessibility />
-                                        </Route>
-                                        <Route path="/personal-info" exact>
-                                          <PersonalInfo />
-                                        </Route>
-                                        <Route
-                                          path="/shipping-and-billing"
-                                          exact
-                                        >
-                                          <Billing />
-                                        </Route>
-                                        <Route path="/trending" exact>
-                                          <Trending />
-                                        </Route>
-                                        <Route path="/best-sellers" exact>
-                                          <BestSeller />
-                                        </Route>
-                                        <Route>
-                                          <WrongPage />
-                                        </Route>
-                                      </Switch>
-                                      <Footer />
+                                          <Route
+                                            path="/items/:catagory/:type"
+                                            element={<Items />}
+                                            exact
+                                          />
+                                          <Route
+                                            path="/item/:id"
+                                            element={<Item />}
+                                            exact
+                                          />
+                                          <Route
+                                            path="/checkout"
+                                            element={<Checkout />}
+                                            exact
+                                          />
+                                          <Route
+                                            path="/your-orders"
+                                            element={<YourOrders />}
+                                            exact
+                                          />
+                                          <Route
+                                            path="/orders"
+                                            element={<YourOrders />}
+                                            exact
+                                          />
+                                          <Route
+                                            path="/search"
+                                            element={<Search />}
+                                            exact
+                                          />
+
+                                          {user.type === "admin" && (
+                                            <Route
+                                              path="/upload"
+                                              element={<UploadItem />}
+                                              exact
+                                            />
+                                          )}
+                                          {user.type === "admin" && (
+                                            <Route
+                                              path="/update-products"
+                                              element={<UpdateProducts />}
+                                              exact
+                                            />
+                                          )}
+                                          {user.type === "admin" && (
+                                            <Route
+                                              path="/edit-item/:id"
+                                              element={<EditProduct />}
+                                              exact
+                                            />
+                                          )}
+                                          {user.type === "admin" && (
+                                            <Route
+                                              path="/update-order"
+                                              element={<UpdateOrder />}
+                                              exact
+                                            />
+                                          )}
+                                          <Route
+                                            path="/terms-and-conditions"
+                                            element={<TermsAndConditions />}
+                                            exact
+                                          />
+                                          <Route
+                                            path="/private-policy"
+                                            element={<PrivatePolicy />}
+                                            exact
+                                          />
+                                          <Route
+                                            path="/accessibility"
+                                            element={<Accessibility />}
+                                            exact
+                                          />
+                                          <Route
+                                            path="/personal-info"
+                                            element={<PersonalInfo />}
+                                            exact
+                                          />
+                                          <Route
+                                            path="/shipping-and-billing"
+                                            element={<Billing />}
+                                            exact
+                                          />
+                                          <Route
+                                            path="/trending"
+                                            element={<Trending />}
+                                            exact
+                                          />
+                                          <Route
+                                            path="/best-sellers"
+                                            element={<BestSeller />}
+                                            exact
+                                          />
+
+                                          <Route
+                                            path="*"
+                                            element={<WrongPage />}
+                                          />
+                                        </Routes>
+                                        <Footer />
+                                      </imgPrefixContext.Provider>
                                     </ColorsContext.Provider>
                                   </StateContext.Provider>
                                 </PathContext.Provider>
@@ -344,7 +393,7 @@ function App() {
           )}
         </Suspense>
       </ErrorBoundary>
-    </Router>
+    </BrowserRouter>
   );
 }
 

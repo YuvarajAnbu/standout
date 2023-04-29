@@ -1,17 +1,19 @@
 import React, { useEffect, useState, useContext } from "react";
 import "./Item.css";
-import { Link, useHistory, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import {
   CartContext,
   HideProductsContext,
   UserProductsContext,
+  imgPrefixContext,
 } from "../../App";
 import Reviews from "./subComponents/Reviews";
 
 function Item() {
-  const history = useHistory();
+  // const history = useHistory();
+  const navigate = useNavigate();
   const [item, setItem] = useState({});
   const [stockIndex, setStockIndex] = useState(0);
   const [sizeIndex, setSizeIndex] = useState(0);
@@ -23,10 +25,17 @@ function Item() {
   const { setCart } = useContext(CartContext);
   const { userProducts } = useContext(UserProductsContext);
   const { hideProducts } = useContext(HideProductsContext);
+  const imgPrefix = useContext(imgPrefixContext);
+
+  const toTitleCase = (str) =>
+    `${str}`.replace(
+      /(^\w|\s\w)(\S*)/g,
+      (_, m1, m2) => m1.toUpperCase() + m2.toLowerCase()
+    );
 
   useEffect(() => {
     if (typeof item._id !== "undefined") {
-      document.title = `${item.name} | Stand Out`;
+      document.title = `${toTitleCase(item.name)} | Stand Out`;
     }
   }, [item]);
 
@@ -44,7 +53,8 @@ function Item() {
       const product = userProducts.filter((e) => e._id === id);
 
       if (product.length === 0) {
-        history.replace("/404");
+        // history.replace("/404");
+        navigate("/404", { replace: true });
       } else {
         setItem(product[0]);
       }
@@ -56,17 +66,60 @@ function Item() {
             throw new Error();
           }
           if (typeof res.data.name === "undefined") {
-            history.replace("/404");
+            // history.replace("/404");
+            navigate("/404", { replace: true });
           } else {
             setItem(res.data);
           }
         })
         .catch((err) => {
-          history.replace("/404");
+          // history.replace("/404");
+          navigate("/404", { replace: true });
           console.log(err);
         });
     }
-  }, [id, userProducts, hideProducts, history]);
+  }, [id, userProducts, hideProducts, navigate]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setAddedToCart(true);
+    setCart((prev) => {
+      const exist = prev.findIndex(
+        (el) =>
+          el._id === item._id &&
+          el.size === item.stock[stockIndex].sizeRemaining[sizeIndex].size &&
+          el.color === item.stock[stockIndex].color
+      );
+
+      if (exist === -1) {
+        return [
+          ...prev,
+          {
+            _id: item._id,
+            image: item.stock[stockIndex].images[0],
+            name: item.name,
+            price: item.price,
+            size: item.stock[stockIndex].sizeRemaining[sizeIndex].size,
+            color: item.stock[stockIndex].color,
+            quantity: quantity,
+          },
+        ];
+      } else {
+        const a = [...prev];
+
+        a[exist] = {
+          _id: item._id,
+          image: item.stock[stockIndex].images[0],
+          name: item.name,
+          price: item.price,
+          size: item.stock[stockIndex].sizeRemaining[sizeIndex].size,
+          color: item.stock[stockIndex].color,
+          quantity: quantity + a[exist].quantity,
+        };
+        return [...a];
+      }
+    });
+  };
 
   return (
     <div className="item-page">
@@ -99,7 +152,7 @@ function Item() {
         <div className="item-page__item">
           <div className="item-page__item__image">
             <img
-              src={item.stock[stockIndex].images[0]}
+              src={imgPrefix(500) + item.stock[stockIndex].images[0]}
               alt={item.name}
               onError={(e) => {
                 e.target.src = "/images/imgFailed.jpg";
@@ -107,7 +160,7 @@ function Item() {
             />
           </div>
 
-          <div className="item-page__item__content">
+          <form className="item-page__item__content" onSubmit={handleSubmit}>
             <p className="item-page__item__content__name">{item.name}</p>
             <p className="item-page__item__content__price">{`$${(
               item.price / 100
@@ -210,7 +263,7 @@ function Item() {
               </p>
               <input
                 type="number"
-                value={quantity}
+                value={quantity.toString()}
                 min={1}
                 max={item.stock[stockIndex].sizeRemaining[sizeIndex].remaining}
                 onChange={(e) => {
@@ -220,53 +273,20 @@ function Item() {
             </div>
             <button
               className="item-page__item__content__cart-button"
-              type="button"
-              onClick={() => {
-                setAddedToCart(true);
-                setCart((prev) => {
-                  const exist = prev.findIndex(
-                    (el) =>
-                      el._id === item._id &&
-                      el.size ===
-                        item.stock[stockIndex].sizeRemaining[sizeIndex].size &&
-                      el.color === item.stock[stockIndex].color
-                  );
-
-                  if (exist === -1) {
-                    return [
-                      ...prev,
-                      {
-                        _id: item._id,
-                        image: item.stock[stockIndex].images[0],
-                        name: item.name,
-                        price: item.price,
-                        size:
-                          item.stock[stockIndex].sizeRemaining[sizeIndex].size,
-                        color: item.stock[stockIndex].color,
-                        quantity: quantity,
-                      },
-                    ];
-                  } else {
-                    const a = [...prev];
-
-                    a[exist] = {
-                      _id: item._id,
-                      image: item.stock[stockIndex].images[0],
-                      name: item.name,
-                      price: item.price,
-                      size:
-                        item.stock[stockIndex].sizeRemaining[sizeIndex].size,
-                      color: item.stock[stockIndex].color,
-                      quantity: quantity + a[exist].quantity,
-                    };
-                    return [...a];
-                  }
-                });
-              }}
+              style={
+                !(
+                  quantity > 0 &&
+                  quantity <=
+                    item.stock[stockIndex].sizeRemaining[sizeIndex].remaining
+                )
+                  ? { opacity: 0.7, cursor: "default" }
+                  : {}
+              }
+              type="submit"
             >
               add to cart
             </button>
-          </div>
+          </form>
         </div>
       )}
 
