@@ -24,6 +24,10 @@ app.use("/user", userRouter);
 app.use("/product", productRouter);
 app.use("/payment", paymentRouter);
 
+app.get("/health", (req, res) => {
+  res.json({ status: "ok" });
+});
+
 //use this only in production and disable it in client side
 
 if (process.env.NODE_ENV === "production") {
