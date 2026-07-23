@@ -1,321 +1,169 @@
 const express = require("express");
+const bcrypt = require("bcrypt");
 const User = require("../models/User");
 const Order = require("../models/Order");
 const auth = require("./middleWares/auth");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+const asyncHandler = require("../utils/asyncHandler");
+const HttpError = require("../utils/httpError");
+const { clearAuthCookies, setAuthCookie } = require("../utils/cookies");
+const { asBoolean, asEmail, asNonEmptyString, asObjectId } = require("../utils/validation");
 
 const router = express.Router();
+const hashRounds = Math.min(14, Math.max(10, Number(process.env.BCRYPT_ROUNDS) || 12));
+const publicUserFields = "name email addresses phone type";
 
-router.post("/signup", async (req, res) => {
-  const { firstName, lastName, email, password } = req.body;
+function serializeUser(user) {
+  return {
+    name: user.name,
+    email: user.email,
+    addresses: user.addresses || [],
+    phone: user.phone || [],
+    type: user.type,
+  };
+}
+
+router.post("/signup", asyncHandler(async (req, res) => {
+  const firstName = asNonEmptyString(req.body.firstName, "first name", { max: 80 });
+  const lastName = asNonEmptyString(req.body.lastName, "last name", { max: 80 });
+  const email = asEmail(req.body.email);
+  const password = asNonEmptyString(req.body.password, "password", { max: 200 });
+  if (password.length < 8) throw new HttpError(400, "Password must be at least 8 characters");
 
   try {
-    const hashedpassword = await bcrypt.hash(password, 8);
-
-    const user = new User({
+    const user = await User.create({
       name: `${firstName} ${lastName}`,
       email,
-      password: hashedpassword,
+      password: await bcrypt.hash(password, hashRounds),
     });
-
-    await user.save();
-
     const token = await user.generateToken();
-
-    const date = new Date();
-    const nextYear = date.getFullYear() + 1;
-    date.setFullYear(nextYear);
-
-    res.cookie("__Host-token", token, {
-      expires: date,
-      secure: true,
-      sameSite: "lax",
-      path: "/",
-      secure: true,
-      httpOnly: true,
-    });
-
-    res.status(201).send({
-      user: {
-        name: user.name,
-        email: user.email,
-        addresses: user.addresses,
-        type: user.type,
-      },
-    });
-  } catch (err) {
-    if (typeof err.keyPattern !== "undefined") {
-      if (err.keyPattern.email === 1) {
-        res.sendStatus(203);
-      } else {
-        res.sendStatus(500);
-      }
-    } else {
-      res.sendStatus(500);
-    }
+    setAuthCookie(res, token);
+    res.status(201).json({ user: serializeUser(user) });
+  } catch (error) {
+    if (error?.code === 11000) throw new HttpError(409, "An account with this email already exists");
+    throw error;
   }
-});
+}));
 
-router.post("/login", async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const user = await User.findOne(
-      { email },
-      "_id name email addresses password tokens type"
-    );
-    if (!user) {
-      throw new Error();
-    }
-    const comparePassword = await bcrypt.compare(password, user.password);
-    if (!comparePassword) {
-      throw new Error();
-    }
-    const token = await user.generateToken();
+router.post("/login", asyncHandler(async (req, res) => {
+  const email = asEmail(req.body.email);
+  const password = asNonEmptyString(req.body.password, "password", { max: 200 });
+  const user = await User.findOne({ email }).select(`+password +tokens ${publicUserFields}`);
 
-    const date = new Date();
-    const nextYear = date.getFullYear() + 1;
-    date.setFullYear(nextYear);
-
-    res.cookie("__Host-token", token, {
-      expires: date,
-      secure: true,
-      sameSite: "lax",
-      path: "/",
-      secure: true,
-      httpOnly: true,
-    });
-    res.status(200).send({
-      user: {
-        name: user.name,
-        email: user.email,
-        addresses: user.addresses,
-        type: user.type,
-      },
-    });
-  } catch (err) {
-    res.sendStatus(400);
+  if (!user || !(await bcrypt.compare(password, user.password))) {
+    throw new HttpError(401, "Invalid email or password");
   }
-});
 
-router.get("/authenticate", auth, async (req, res) => {
-  try {
-    // if (typeof req.userId === "undefined") {
-    //   throw new Error();
-    // }
-    let user;
-    if (typeof req.userId === "undefined") {
-      const date = new Date();
-      const nextYear = date.getFullYear() + 1;
-      date.setFullYear(nextYear);
+  const token = await user.generateToken();
+  setAuthCookie(res, token);
+  res.json({ user: serializeUser(user) });
+}));
 
-      const token =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZmM1NTBmMGIzZDcyNTQ3ODBlNWVmYmYiLCJpYXQiOjE2MDkyNzgzNTV9.pIsMy7ZTEzrbdVjANaGS8MnimL9w6unPGGXm2-jm_Oo";
-      const decoded = await jwt.verify(token, process.env.JWT_SECRET);
-      user = await User.findOne(
-        { _id: decoded._id, tokens: { $in: [token] } },
-        "_id name email addresses type"
-      );
+router.get("/authenticate", auth, asyncHandler(async (req, res) => {
+  if (!req.userId) return res.json({ user: {} });
 
-      res.cookie("__Host-token", token, {
-        expires: date,
-        secure: true,
-        sameSite: "lax",
-        path: "/",
-        secure: true,
-        httpOnly: true,
-      });
-    } else {
-      user = await User.findOne(
-        { _id: req.userId, tokens: { $in: [req.token] } },
-        "_id name email addresses type"
-      );
-    }
-
-    if (!user) {
-      throw new Error();
-    }
-    res.status(200).send({
-      user: {
-        name: user.name,
-        email: user.email,
-        addresses: user.addresses,
-        type: user.type,
-      },
-    });
-  } catch (err) {
-    console.log(err);
-    res.status(200).send({ user: {} });
+  const user = await User.findOne(
+    { _id: req.userId, tokens: req.token },
+    publicUserFields
+  ).lean();
+  if (!user) {
+    clearAuthCookies(res);
+    return res.json({ user: {} });
   }
-});
+  return res.json({ user: serializeUser(user) });
+}));
 
-router.put("/logout", auth, async (req, res) => {
-  try {
-    if (typeof req.userId === "undefined") {
-      throw new Error();
-    }
+router.put("/logout", auth.requireAuth, asyncHandler(async (req, res) => {
+  await User.updateOne({ _id: req.userId }, { $pull: { tokens: req.token } });
+  clearAuthCookies(res);
+  res.json({ success: true });
+}));
 
-    // await User.updateOne({ _id: req.userId }, { $pull: { tokens: req.token } });
+router.put("/logout-all", auth.requireAuth, asyncHandler(async (req, res) => {
+  await User.updateOne({ _id: req.userId }, { $set: { tokens: [] } });
+  clearAuthCookies(res);
+  res.json({ success: true });
+}));
 
-    res.clearCookie("__Host-token", {
-      secure: true,
-      sameSite: "lax",
-      path: "/",
-      secure: true,
-      httpOnly: true,
-    });
+router.get("/is-admin", auth.requireAdmin, (req, res) => res.json("admin"));
 
-    res.sendStatus(200);
-  } catch (err) {
-    res.sendStatus(400);
+router.put("/update", auth.requireAuth, asyncHandler(async (req, res) => {
+  const input = req.body.data;
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    throw new HttpError(400, "Invalid user data");
   }
-});
 
-router.put("/logout-all", auth, async (req, res) => {
-  try {
-    if (typeof req.userId === "undefined") {
-      throw new Error();
-    }
-
-    // await User.updateOne({ _id: req.userId }, { tokens: [] });
-
-    res.clearCookie("__Host-token", {
-      secure: true,
-      sameSite: "lax",
-      path: "/",
-      secure: true,
-      httpOnly: true,
-    });
-
-    res.sendStatus(200);
-  } catch (err) {
-    res.sendStatus(400);
+  const update = {};
+  if (input.name !== undefined) update.name = asNonEmptyString(input.name, "name", { max: 160 });
+  if (input.email !== undefined) update.email = asEmail(input.email);
+  if (input.password !== undefined) {
+    const password = asNonEmptyString(input.password, "password", { max: 200 });
+    if (password.length < 8) throw new HttpError(400, "Password must be at least 8 characters");
+    update.password = await bcrypt.hash(password, hashRounds);
   }
-});
-
-router.get("/is-admin", auth, async (req, res) => {
-  try {
-    if (typeof req.userId === "undefined") {
-      throw new Error();
-    }
-    const user = await User.findById(req.userId, "type");
-
-    if (typeof user.type === "undefined") {
-      throw new Error();
-    }
-
-    res.send(user.type);
-  } catch (err) {
-    res.sendStatus(400);
+  if (input.phone !== undefined) {
+    if (!Array.isArray(input.phone) || input.phone.length > 5) throw new HttpError(400, "Invalid phone numbers");
+    update.phone = input.phone.map((phone) => asNonEmptyString(phone, "phone", { max: 40 }));
   }
-});
-
-router.put("/update", auth, async (req, res) => {
-  try {
-    const data = req.body.data;
-
-    if (typeof req.userId === "undefined") {
-      throw new Error();
-    }
-
-    if (req.userId === "5fc550f0b3d7254780e5efbf") {
-      throw new Error();
-    }
-
-    if (typeof data.password !== "undefined") {
-      data.password = await bcrypt.hash(data.password, 8);
-    }
-
-    await User.updateOne({ _id: req.userId }, data);
-
-    res.sendStatus(200);
-  } catch (err) {
-    res.sendStatus(400);
+  if (input.addresses !== undefined) {
+    if (!Array.isArray(input.addresses) || input.addresses.length > 10) throw new HttpError(400, "Invalid addresses");
+    update.addresses = input.addresses;
   }
-});
-
-router.get("/check-user", auth, async (req, res) => {
-  try {
-    const password = req.query.password;
-
-    if (typeof req.userId === "undefined") {
-      throw new Error();
-    }
-    const user = await User.findById(req.userId, "password");
-
-    const comparePassword = await bcrypt.compare(password, user.password);
-    if (!comparePassword) {
-      throw new Error();
-    }
-
-    res.sendStatus(200);
-  } catch (err) {
-    res.sendStatus(400);
-  }
-});
-
-router.get("/orders", auth, async (req, res) => {
-  try {
-    if (typeof req.userId === "undefined") {
-      throw new Error();
-    }
-    const user = await User.findById(req.userId, "orders");
-
-    const orders = await Order.find(
-      { _id: user.orders },
-      "items delivered amount shippingAddress date",
-      { sort: "-date" }
-    );
-
-    res.send(orders);
-  } catch (err) {
-    res.sendStatus(400);
-  }
-});
-
-router.get("/guest-order", async (req, res) => {
-  const { orderId } = req.query;
+  if (Object.keys(update).length === 0) throw new HttpError(400, "No supported fields to update");
 
   try {
-    const order = await Order.findById(
-      orderId,
-      "items delivered amount shippingAddress date"
-    );
-
-    res.send(order);
-  } catch (err) {
-    res.sendStatus(400);
+    await User.updateOne({ _id: req.userId }, { $set: update }, { runValidators: true });
+  } catch (error) {
+    if (error?.code === 11000) throw new HttpError(409, "An account with this email already exists");
+    throw error;
   }
-});
+  res.json({ success: true });
+}));
 
-router.get("/delivered/:id", async (req, res) => {
-  try {
-    const orders = await Order.findById(req.params.id, "delivered");
-    res.send(orders);
-  } catch (err) {
-    res.sendStatus(400);
+router.post("/check-user", auth.requireAuth, asyncHandler(async (req, res) => {
+  const password = asNonEmptyString(req.body.password, "password", { max: 200 });
+  const user = await User.findById(req.userId).select("+password");
+  if (!user || !(await bcrypt.compare(password, user.password))) {
+    throw new HttpError(401, "Invalid password");
   }
-});
+  res.json({ valid: true });
+}));
 
-router.put("/order", auth, async (req, res) => {
-  try {
-    if (typeof req.userId === "undefined") {
-      throw new Error();
-    }
+router.get("/orders", auth.requireAuth, asyncHandler(async (req, res) => {
+  const user = await User.findById(req.userId, "orders").lean();
+  if (!user) throw new HttpError(404, "User not found");
+  const orders = await Order.find(
+    { _id: { $in: user.orders } },
+    "items delivered amount shippingAddress billingAddress customer date"
+  ).sort({ date: -1 }).lean();
+  res.json(orders);
+}));
 
-    const user = await User.findById(req.userId, "type");
-    if (user.type !== "admin") {
-      throw new Error();
-    }
+router.get("/guest-order", asyncHandler(async (req, res) => {
+  const orderId = asObjectId(req.query.orderId, "order id");
+  const order = await Order.findById(
+    orderId,
+    "items delivered amount shippingAddress billingAddress customer date"
+  ).lean();
+  if (!order) throw new HttpError(404, "Order not found");
+  res.json(order);
+}));
 
-    await Order.updateOne(
-      { _id: req.body.order._id },
-      { delivered: req.body.order.delivered }
-    );
-    res.sendStatus(200);
-  } catch (err) {
-    res.sendStatus(400);
-  }
-});
+router.get("/delivered/:id", auth.requireAdmin, asyncHandler(async (req, res) => {
+  const order = await Order.findById(asObjectId(req.params.id, "order id"), "delivered").lean();
+  if (!order) throw new HttpError(404, "Order not found");
+  res.json(order);
+}));
+
+router.put("/order", auth.requireAdmin, asyncHandler(async (req, res) => {
+  const order = req.body.order;
+  if (!order || typeof order !== "object") throw new HttpError(400, "Invalid order");
+  const updated = await Order.findByIdAndUpdate(
+    asObjectId(order._id, "order id"),
+    { $set: { delivered: asBoolean(order.delivered, "delivered") } },
+    { new: true, runValidators: true }
+  ).select("delivered").lean();
+  if (!updated) throw new HttpError(404, "Order not found");
+  res.json(updated);
+}));
 
 module.exports = router;

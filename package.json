@@ -5,23 +5,25 @@
   "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",
-    "dev": "nodemon"
+    "dev": "nodemon server/server.js",
+    "check:server": "node server/scripts/check.js",
+    "test:server": "node --test server/tests/*.test.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bcrypt": "^5.1.0",
-    "braintree": "^3.15.0",
-    "cloudinary": "^1.36.2",
-    "express": "^4.18.2",
-    "jsonwebtoken": "^9.0.0",
-    "mongoose": "^7.0.5"
+    "bcrypt": "^6.0.0",
+    "braintree": "^3.38.0",
+    "cloudinary": "^2.10.0",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.8.0"
   },
   "devDependencies": {
-    "dotenv": "^16.0.3",
-    "nodemon": "^2.0.22"
+    "dotenv": "^17.4.2",
+    "nodemon": "^3.1.14"
   },
   "engines": {
-  "node": "16.x"
-}
+    "node": ">=22.12.0"
+  }
 }

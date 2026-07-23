@@ -73,10 +73,12 @@ body {
      -moz-user-select: none;
           user-select: none;
   align-items: center;
-  display: flex;
 }
 .msg--visible {
   transform: translateX(0);
+}
+.msg {
+  display: flex;
 }
 .msg .icon {
   float: left;

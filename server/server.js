@@ -1,42 +1,37 @@
-if (!process.env.PORT) {
-  require("dotenv").config();
+const { port, requireEnvironment } = require("./config/env");
+const { createApp } = require("./app");
+const { connectDatabase, disconnectDatabase } = require("./config/mongoose");
+
+let server;
+let shuttingDown = false;
+
+async function shutdown(signal) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  console.info(`${signal} received; shutting down`);
+
+  const forceExit = setTimeout(() => process.exit(1), 10_000);
+  forceExit.unref();
+
+  if (server) {
+    await new Promise((resolve) => server.close(resolve));
+  }
+  await disconnectDatabase();
+  clearTimeout(forceExit);
 }
-require("./config/mongoose");
-const express = require("express");
-const userRouter = require("./routes/user");
-const productRouter = require("./routes/product");
-const paymentRouter = require("./routes/payment");
-const path = require("path");
-const auth = require("./routes/middleWares/auth");
 
-const app = express();
+async function start() {
+  requireEnvironment(["MONGODB_URI", "JWT_SECRET"]);
+  await connectDatabase();
+  server = createApp().listen(port, () => console.info(`Server listening on ${port}`));
+}
 
-// const port = process.env.PORT || 3001;
-const port = process.env.PORT || "3001" || 3001;
+process.once("SIGINT", () => shutdown("SIGINT"));
+process.once("SIGTERM", () => shutdown("SIGTERM"));
 
-//convert incoming objects to json and changing default limit for incoming json
-app.use(express.json({ limit: "500mb" }));
-
-// body-parser and changing default limit for incoming json
-app.use(express.urlencoded({ extended: true, limit: "500mb" }));
-
-app.use("/user", userRouter);
-app.use("/product", productRouter);
-app.use("/payment", paymentRouter);
-
-app.get("/health", (req, res) => {
-  res.json({ status: "ok" });
+start().catch((error) => {
+  console.error("Server failed to start", error);
+  process.exitCode = 1;
 });
 
-//use this only in production and disable it in client side
-
-if (process.env.NODE_ENV === "production") {
-  // Set static folder
-  app.use(express.static(path.join(__dirname, "/../client/build")));
-
-  app.get("*", auth, (req, res) => {
-    res.sendFile(path.join(__dirname, "/../client/build/index.html"));
-  });
-}
-
-app.listen(port, () => console.log(`server running on ${port}`));
+module.exports = { shutdown, start };

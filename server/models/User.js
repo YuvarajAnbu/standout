@@ -11,16 +11,20 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    lowercase: true,
+    trim: true,
   },
   password: {
     type: String,
     required: true,
+    select: false,
   },
   type: {
     type: String,
     default: "user",
+    enum: ["user", "admin"],
   },
-  phone: [],
+  phone: [{ type: String, trim: true }],
   addresses: [
     {
       extendedAddress: String,
@@ -32,13 +36,17 @@ const UserSchema = new mongoose.Schema({
       streetAddress: String,
     },
   ],
-  tokens: [String],
-  orders: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-});
+  tokens: { type: [String], select: false, default: [] },
+  orders: [{ type: mongoose.Schema.Types.ObjectId, ref: "Order" }],
+}, { timestamps: true });
 
 UserSchema.methods.generateToken = async function () {
-  const token = jwt.sign({ _id: this._id.toString() }, process.env.JWT_SECRET);
-  this.tokens = this.tokens.concat(token);
+  const token = jwt.sign(
+    { _id: this._id.toString() },
+    process.env.JWT_SECRET,
+    { expiresIn: "30d" }
+  );
+  this.tokens = this.tokens.concat(token).slice(-5);
   await this.save();
   return token;
 };
