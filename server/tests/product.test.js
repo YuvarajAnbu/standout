@@ -63,3 +63,28 @@ test("catalog products, count, and filters come from one aggregation", async () 
     Product.aggregate = originalAggregate;
   }
 });
+
+test("catalog aggregation omits filter work when facets are not requested", async () => {
+  const originalAggregate = Product.aggregate;
+  let aggregation;
+  Product.aggregate = async (pipeline) => {
+    aggregation = pipeline;
+    return [{ products: [], metadata: [] }];
+  };
+
+  try {
+    const response = await helpers.catalogResponse({
+      match: {},
+      query: { includeFilters: "false" },
+      sort: { createdAt: -1 },
+    });
+
+    assert.deepEqual(response, { products: [], count: 0 });
+    assert.deepEqual(Object.keys(aggregation[1].$facet), [
+      "products",
+      "metadata",
+    ]);
+  } finally {
+    Product.aggregate = originalAggregate;
+  }
+});

@@ -93,33 +93,33 @@ function sortFrom(query, fallback) {
 async function catalogResponse({ match, query, sort, projection = listProjection }) {
   const { limit, skip } = pagination(query);
   const includeFilters = query.includeFilters !== "false";
+  const facets = {
+    products: [
+      { $sort: sort },
+      { $skip: skip },
+      { $limit: limit },
+      { $project: projection },
+    ],
+    metadata: [{ $count: "count" }],
+  };
+  if (includeFilters) {
+    facets.filterValues = [
+      { $unwind: "$stock" },
+      { $unwind: "$stock.sizeRemaining" },
+      { $match: { "stock.sizeRemaining.remaining": { $gt: 0 } } },
+      {
+        $group: {
+          _id: null,
+          colors: { $addToSet: "$stock.color" },
+          sizes: { $addToSet: "$stock.sizeRemaining.size" },
+        },
+      },
+    ];
+  }
+
   const [result] = await Product.aggregate([
     { $match: match },
-    {
-      $facet: {
-        products: [
-          { $sort: sort },
-          { $skip: skip },
-          { $limit: limit },
-          { $project: projection },
-        ],
-        metadata: [{ $count: "count" }],
-        filterValues: includeFilters
-          ? [
-              { $unwind: "$stock" },
-              { $unwind: "$stock.sizeRemaining" },
-              { $match: { "stock.sizeRemaining.remaining": { $gt: 0 } } },
-              {
-                $group: {
-                  _id: null,
-                  colors: { $addToSet: "$stock.color" },
-                  sizes: { $addToSet: "$stock.sizeRemaining.size" },
-                },
-              },
-            ]
-          : [{ $limit: 0 }],
-      },
-    },
+    { $facet: facets },
   ]);
   let filters;
   if (includeFilters) {
