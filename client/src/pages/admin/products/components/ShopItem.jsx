@@ -1,26 +1,41 @@
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link, useNavigate } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { imgPrefix } from "@/shared/utils/images";
+import { apiRequest } from "@/shared/api/client";
 
 function ShopItem({
   el,
   stockIndex,
   index,
   setStockIndex,
-  // setErrorMsgs,
+  setErrorMsgs,
   setSuccessMsgs,
   setUpdate,
-  // userProducts,
-  setUserProducts,
-  setHideProducts,
 }) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [hideColors, setHideColors] = useState(true);
-
-  const [loadingButton, setLoadingButton] = useState(false);
-
   const [hideToolTip, setHideToolTip] = useState(true);
+  const deleteProduct = useMutation({
+    mutationFn: () =>
+      apiRequest(`/product/${el._id}`, {
+        method: "DELETE",
+      }),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["products"] }),
+        queryClient.invalidateQueries({ queryKey: ["http"] }),
+        queryClient.invalidateQueries({ queryKey: ["http-scope"] }),
+      ]);
+      setSuccessMsgs("Item deleted successfully");
+      setHideToolTip(true);
+      setUpdate((current) => current + 1);
+    },
+    onError: (error) =>
+      setErrorMsgs(error.message || "Could not delete this product"),
+  });
 
   const sizeArray = (arr) => {
     let str = "";
@@ -67,28 +82,14 @@ function ShopItem({
               </button>
               <button
                 className={
-                  loadingButton
+                  deleteProduct.isPending
                     ? "shop__items-container__items__item__image-container__tool-tip__button-container__yes shop__items-container__items__item__image-container__tool-tip__button-container__yes--loading"
                     : "shop__items-container__items__item__image-container__tool-tip__button-container__yes"
                 }
-                onClick={() => {
-                  if (!loadingButton) {
-                    setLoadingButton(true);
-                    setUserProducts((prev) =>
-                      prev.filter((e) => e._id !== el._id)
-                    );
-                    setLoadingButton(false);
-                    setSuccessMsgs("item deleted successfully");
-
-                    if (el._id.length >= 10)
-                      setHideProducts((prev) => [...prev, el._id]);
-
-                    setHideToolTip(true);
-                    setUpdate((prev) => prev + 1);
-                  }
-                }}
+                disabled={deleteProduct.isPending}
+                onClick={() => deleteProduct.mutate()}
               >
-                {loadingButton ? (
+                {deleteProduct.isPending ? (
                   <div className="shop__items-container__items__item__image-container__tool-tip__button-container__yes__loading"></div>
                 ) : (
                   "yes"

@@ -38,9 +38,7 @@ function UpdateProducts() {
 
   const { uploadOptions } = products;
   const userProducts = useAppStore((state) => state.userProducts);
-  const setUserProducts = useAppStore((state) => state.setUserProducts);
   const hideProducts = useAppStore((state) => state.hideProducts);
-  const setHideProducts = useAppStore((state) => state.setHideProducts);
 
   const [input, setInput] = useState("");
   const [search, setSearch] = useState("");
@@ -87,6 +85,7 @@ function UpdateProducts() {
     errorMsgs,
     showMsgs,
     setSuccessMsgs,
+    setErrorMsgs,
     dismissMessages,
   } = useTimedMessages();
 
@@ -580,10 +579,9 @@ function UpdateProducts() {
                       stockIndex,
                       index,
                       setStockIndex,
+                      setErrorMsgs,
                       setSuccessMsgs,
                       setUpdate,
-                      setUserProducts,
-                      setHideProducts,
                     }}
                   />
                 ))}

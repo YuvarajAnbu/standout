@@ -15,3 +15,14 @@
 Use Node's package imports (`#app/`, `#modules/`, `#infrastructure/`,
 `#shared/`, and `#config/`) across architectural boundaries. Relative imports
 are reserved for files within the same local module.
+
+## Product mutations
+
+Authenticated administrators can create, update, and delete products through
+`POST /product`, `PUT /product/:id`, and `DELETE /product/:id`. New product
+images are uploaded to Cloudinary; replaced images are cleaned up after the
+MongoDB write succeeds.
+
+Authenticated customers who purchased a product can create or update their
+review with `PUT /product/:id/review` and delete it with
+`DELETE /product/:id/review`.

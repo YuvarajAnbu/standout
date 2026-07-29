@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import "@/pages/admin/upload-product/UploadItem.scss";
-import { useAppStore } from "@/app/store/useAppStore";
 import products from "@/features/catalog/data/products";
 import colors from "@/features/catalog/data/colors";
 import StockBox from "@/pages/admin/upload-product/StockBox";
 import { useTimedMessages } from "@/shared/hooks/useTimedMessages";
 import MessageBanner from "@/shared/components/ui/MessageBanner";
 import ProductFormFields from "@/features/admin/components/ProductFormFields";
+import { buildProductPayload } from "@/features/admin/productPayload";
+import { apiRequest } from "@/shared/api/client";
 
 const initialStock = {
   images: [],
@@ -17,12 +19,9 @@ const initialStock = {
 
 export default function UploadItem() {
   const { uploadOptions } = products;
-  const setUserProducts = useAppStore((state) => state.setUserProducts);
-  const userCount = useAppStore((state) => state.userCount);
-  const setUserCount = useAppStore((state) => state.setUserCount);
+  const queryClient = useQueryClient();
   const [category, setCategory] = useState("women");
   const [images, setImages] = useState({});
-  const [submitting, setSubmitting] = useState(false);
   const {
     successMsgs,
     errorMsgs,
@@ -52,30 +51,24 @@ export default function UploadItem() {
     },
   });
   const { fields, append, remove } = useFieldArray({ control, name: "stock" });
+  const createProduct = useMutation({
+    mutationFn: (product) =>
+      apiRequest("/product", {
+        method: "POST",
+        body: { product },
+      }),
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["products"] }),
+        queryClient.invalidateQueries({ queryKey: ["http"] }),
+        queryClient.invalidateQueries({ queryKey: ["http-scope"] }),
+      ]),
+  });
 
-  const onSubmit = (data) => {
-    setSubmitting(true);
+  const onSubmit = async (data) => {
     try {
-      let nextId = userCount;
-      const stock = data.stock.map((entry, index) => {
-        const field = fields[index];
-        const stockImages = images[field?.id];
-        if (!stockImages?.length) throw new Error("Each stock item needs an image");
-        nextId += 1;
-        return { ...entry, _id: `${nextId}`, images: stockImages };
-      });
-      const product = {
-        _id: `${userCount}`,
-        name: data.name.trim(),
-        price: Math.round(Number(data.price) * 100),
-        catagory: data.catagory,
-        type: data.type,
-        createdAt: `${new Date().getTime()}`,
-        stock,
-      };
-
-      setUserProducts((current) => [...current, product]);
-      setUserCount(nextId + 1);
+      const product = buildProductPayload(data, fields, images);
+      await createProduct.mutateAsync(product);
       setSuccessMsgs("Product uploaded successfully");
       setCategory("women");
       setImages({});
@@ -86,8 +79,6 @@ export default function UploadItem() {
       });
     } catch (error) {
       setErrorMsgs(error.message || "Something went wrong. Please try again");
-    } finally {
-      setSubmitting(false);
     }
   };
 
@@ -118,7 +109,7 @@ export default function UploadItem() {
             append,
             remove,
           }}
-          loading={submitting}
+          loading={createProduct.isPending}
           submitLabel="upload"
         />
       </form>

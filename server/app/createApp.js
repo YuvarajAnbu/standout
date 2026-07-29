@@ -16,7 +16,7 @@ function createApp() {
   app.disable("x-powered-by");
   app.set("trust proxy", isProduction ? 1 : false);
   app.use(securityHeaders);
-  app.use(express.json({ limit: process.env.REQUEST_BODY_LIMIT || "2mb" }));
+  app.use(express.json({ limit: process.env.REQUEST_BODY_LIMIT || "25mb" }));
   app.use(express.urlencoded({ extended: false, limit: "100kb" }));
 
   app.get("/health", (req, res) => {

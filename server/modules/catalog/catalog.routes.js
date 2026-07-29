@@ -7,6 +7,15 @@ const auth = require("#modules/auth/auth.middleware");
 const asyncHandler = require("#shared/http/asyncHandler");
 const HttpError = require("#shared/errors/HttpError");
 const { asObjectId, pagination } = require("#shared/validation/index");
+const {
+  DATA_IMAGE_PATTERN,
+  parseProductInput,
+  parseReviewInput,
+} = require("#modules/catalog/product.input");
+const {
+  destroyProductImages,
+  uploadProductImage,
+} = require("#infrastructure/media/cloudinary");
 
 const router = express.Router();
 const NO_MATCH = ";0.hjgbhj";
@@ -19,6 +28,27 @@ const listProjection = {
   averageRating: { $avg: "$reviews.rating" },
   totalRatings: { $size: { $ifNull: ["$reviews", []] } },
 };
+
+const productImages = (product) =>
+  (product.stock || []).flatMap((stock) => stock.images || []);
+
+async function materializeStock(stock, uploadedImages) {
+  const result = [];
+  for (const variant of stock) {
+    const images = [];
+    for (const image of variant.images) {
+      if (!DATA_IMAGE_PATTERN.test(image)) {
+        images.push(image);
+        continue;
+      }
+      const uploaded = await uploadProductImage(image);
+      uploadedImages.push(uploaded);
+      images.push(uploaded);
+    }
+    result.push({ ...variant, images });
+  }
+  return result;
+}
 
 function commaList(value) {
   return typeof value === "string" ? value.split(",").map((item) => item.trim()).filter(Boolean) : [];
@@ -184,6 +214,112 @@ router.get("/reviews", auth, asyncHandler(async (req, res) => {
     response.purchased = purchased;
   }
   res.json(response);
+}));
+
+router.post("/", auth.requireAdmin, asyncHandler(async (req, res) => {
+  const input = parseProductInput(req.body.product);
+  const uploadedImages = [];
+  try {
+    const stock = await materializeStock(input.stock, uploadedImages);
+    const product = await Product.create({
+      ...input,
+      stock,
+      createdAt: String(Date.now()),
+    });
+    res.status(201).json(product);
+  } catch (error) {
+    await destroyProductImages(uploadedImages);
+    throw error;
+  }
+}));
+
+router.put("/:id", auth.requireAdmin, asyncHandler(async (req, res) => {
+  const id = asObjectId(req.params.id, "product id");
+  const product = await Product.findById(id);
+  if (!product) throw new HttpError(404, "Product not found");
+
+  const input = parseProductInput(req.body.product);
+  const previousImages = productImages(product);
+  const previousImageSet = new Set(previousImages);
+  for (const image of productImages(input)) {
+    if (!DATA_IMAGE_PATTERN.test(image) && !previousImageSet.has(image)) {
+      throw new HttpError(400, "Product contains an unknown image");
+    }
+  }
+
+  const uploadedImages = [];
+  try {
+    const stock = await materializeStock(input.stock, uploadedImages);
+    product.set({ ...input, stock });
+    await product.save();
+
+    const retainedImages = new Set(productImages(product));
+    await destroyProductImages(
+      previousImages.filter((image) => !retainedImages.has(image)),
+    );
+    res.json(product);
+  } catch (error) {
+    await destroyProductImages(uploadedImages);
+    throw error;
+  }
+}));
+
+router.delete("/:id", auth.requireAdmin, asyncHandler(async (req, res) => {
+  const id = asObjectId(req.params.id, "product id");
+  const product = await Product.findById(id);
+  if (!product) throw new HttpError(404, "Product not found");
+
+  const images = productImages(product);
+  await product.deleteOne();
+  await destroyProductImages(images);
+  res.status(204).end();
+}));
+
+router.put("/:id/review", auth.requireAuth, asyncHandler(async (req, res) => {
+  const id = asObjectId(req.params.id, "product id");
+  const reviewInput = parseReviewInput(req.body);
+  const user = await User.findById(req.userId, "name email orders").lean();
+  if (!user) throw new HttpError(401, "Authentication required");
+
+  const purchased = await Order.exists({
+    _id: { $in: user.orders || [] },
+    "items._id": id,
+  });
+  if (!purchased) {
+    throw new HttpError(403, "Purchase this product before reviewing it");
+  }
+
+  const product = await Product.findById(id);
+  if (!product) throw new HttpError(404, "Product not found");
+  const existing = product.reviews.find(
+    (review) => String(review.user) === String(req.userId),
+  );
+  if (existing) {
+    existing.set(reviewInput);
+  } else {
+    product.reviews.push({ user: req.userId, ...reviewInput });
+  }
+  await product.save();
+
+  const saved = product.reviews.find(
+    (review) => String(review.user) === String(req.userId),
+  );
+  res.json({
+    ...saved.toObject(),
+    user: undefined,
+    userName: user.name,
+    email: user.email,
+  });
+}));
+
+router.delete("/:id/review", auth.requireAuth, asyncHandler(async (req, res) => {
+  const id = asObjectId(req.params.id, "product id");
+  const result = await Product.updateOne(
+    { _id: id },
+    { $pull: { reviews: { user: req.userId } } },
+  );
+  if (!result.matchedCount) throw new HttpError(404, "Product not found");
+  res.status(204).end();
 }));
 
 router.get("/filter/:catagory/:type", asyncHandler(async (req, res) => {

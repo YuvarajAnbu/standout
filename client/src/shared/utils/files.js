@@ -2,7 +2,7 @@ const DEFAULT_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/avi
 
 export async function readImagesAsDataUrls(
   files,
-  { maxFiles = 8, maxBytes = 5 * 1024 * 1024, types = DEFAULT_IMAGE_TYPES } = {}
+  { maxFiles = 8, maxBytes = 1024 * 1024, types = DEFAULT_IMAGE_TYPES } = {}
 ) {
   const validFiles = Array.from(files)
     .filter((file) => types.includes(file.type) && file.size <= maxBytes)

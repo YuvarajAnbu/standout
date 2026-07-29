@@ -5,10 +5,9 @@ import { createIndexedDbStorage } from "@/shared/storage/indexedDbStorage";
 const resolveUpdate = (update, current) =>
   typeof update === "function" ? update(current) : update;
 
-const persistedKeys = [
-  "cart",
-  "orders",
-  "hideOrders",
+const persistedKeys = ["cart", "orders", "hideOrders"];
+const legacyKeys = [
+  ...persistedKeys,
   "userProducts",
   "hideProducts",
   "reviews",
@@ -38,7 +37,7 @@ const legacyPersistedValue = () =>
     ? JSON.stringify({ state: legacyState, version: 1 })
     : null;
 const removeLegacyState = () =>
-  persistedKeys.forEach((key) => localStorage.removeItem(key));
+  legacyKeys.forEach((key) => localStorage.removeItem(key));
 
 export const useAppStore = create(
   persist(
@@ -98,22 +97,20 @@ export const useAppStore = create(
         cart,
         orders,
         hideOrders,
-        userProducts,
-        hideProducts,
-        reviews,
-        hideReviews,
-        userCount,
       }) => ({
         cart,
         orders,
         hideOrders,
-        userProducts,
-        hideProducts,
-        reviews,
-        hideReviews,
-        userCount,
       }),
-      version: 1,
+      migrate: (persistedState) => ({
+        ...persistedState,
+        userProducts: [],
+        hideProducts: [],
+        reviews: [],
+        hideReviews: [],
+        userCount: 0,
+      }),
+      version: 2,
     }
   )
 );

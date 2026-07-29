@@ -8,6 +8,7 @@ orders, customer accounts, admin order management, and Braintree payments.
 - Node.js 22.12 or newer
 - MongoDB
 - Braintree sandbox credentials
+- Cloudinary credentials for product image management
 
 Copy `.env.example` to `.env` and replace every placeholder with your own value.
 Never commit `.env`.

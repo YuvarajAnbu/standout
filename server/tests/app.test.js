@@ -46,3 +46,26 @@ test("administrative order routes reject anonymous requests before database acce
     assert.deepEqual(await response.json(), { message: "Authentication required" });
   });
 });
+
+test("product and review mutations reject anonymous requests before external access", async () => {
+  await withServer(async (baseUrl) => {
+    const requests = [
+      ["POST", "/product"],
+      ["PUT", "/product/507f1f77bcf86cd799439011"],
+      ["DELETE", "/product/507f1f77bcf86cd799439011"],
+      ["PUT", "/product/507f1f77bcf86cd799439011/review"],
+      ["DELETE", "/product/507f1f77bcf86cd799439011/review"],
+    ];
+    for (const [method, path] of requests) {
+      const response = await fetch(`${baseUrl}${path}`, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: method === "DELETE" ? undefined : "{}",
+      });
+      assert.equal(response.status, 401, `${method} ${path}`);
+      assert.deepEqual(await response.json(), {
+        message: "Authentication required",
+      });
+    }
+  });
+});

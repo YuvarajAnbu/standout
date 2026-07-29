@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAppStore } from "@/app/store/useAppStore";
 import { cachedGet } from "@/shared/api/queries";
+import { apiRequest } from "@/shared/api/client";
 import { useForm } from "react-hook-form";
 import { useTimedMessages } from "@/shared/hooks/useTimedMessages";
 import MessageBanner from "@/shared/components/ui/MessageBanner";
@@ -10,12 +12,10 @@ import { reportError } from "@/shared/utils/logger";
 function Reviews({ id, totalRatings }) {
   const user = useAppStore((state) => state.user);
   const userReviews = useAppStore((state) => state.reviews);
-  const setUserReviews = useAppStore((state) => state.setReviews);
-  const userCount = useAppStore((state) => state.userCount);
-  const setUserCount = useAppStore((state) => state.setUserCount);
   const hideReviews = useAppStore((state) => state.hideReviews);
-  const setHideReviews = useAppStore((state) => state.setHideReviews);
   const orders = useAppStore((state) => state.orders);
+  const queryClient = useQueryClient();
+  const [reviewVersion, setReviewVersion] = useState(0);
 
   const [showInput, setShowInput] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -149,7 +149,7 @@ function Reviews({ id, totalRatings }) {
           setLoading(false);
         });
     }
-  }, [id, orders, user, userReviews, hideReviews]);
+  }, [id, orders, user, userReviews, hideReviews, reviewVersion]);
 
   const pagination = async () => {
     setPaginateLoading(true);
@@ -184,27 +184,53 @@ function Reviews({ id, totalRatings }) {
     }
   }, [errors, setErrorMsgs]);
 
+  const refreshReviews = async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["http"] }),
+      queryClient.invalidateQueries({ queryKey: ["products"] }),
+    ]);
+    setPage(0);
+    setReviewVersion((current) => current + 1);
+  };
+  const saveReview = useMutation({
+    mutationFn: (review) =>
+      apiRequest(`/product/${id}/review`, {
+        method: "PUT",
+        body: review,
+      }),
+    onSuccess: async () => {
+      await refreshReviews();
+      setLoading(false);
+      setShowInput(false);
+      setSuccessMsgs("Review updated successfully");
+    },
+    onError: (error) => {
+      setLoading(false);
+      setErrorMsgs(error.message || "Could not save your review");
+    },
+  });
+  const deleteReview = useMutation({
+    mutationFn: () =>
+      apiRequest(`/product/${id}/review`, {
+        method: "DELETE",
+      }),
+    onSuccess: async () => {
+      await refreshReviews();
+      setLoading(false);
+      setSuccessMsgs("Your review was deleted successfully.");
+    },
+    onError: (error) => {
+      setLoading(false);
+      setErrorMsgs(error.message || "Could not delete your review");
+    },
+  });
+
   const onSubmit = (data) => {
     setLoading(true);
-    let review = {
-      _id: userCount,
-      productId: id,
-      email: user.email,
-      userName: user.name,
-      rating: data.rating,
+    saveReview.mutate({
+      rating: Number(data.rating),
       review: data.review,
-    };
-
-    setUserReviews((prev) => [
-      ...prev.filter((el) => review.email !== el.email),
-      review,
-    ]);
-    setUserCount((prev) => prev + 1);
-    setPage(0);
-
-    setLoading(false);
-    setShowInput(false);
-    setSuccessMsgs("review updated successfully");
+    });
   };
 
   return loading ? (
@@ -365,9 +391,8 @@ function Reviews({ id, totalRatings }) {
                 icon="trash"
                 className="icon"
                 onClick={() => {
-                  setHideReviews((prev) => [...prev, id + "&&&" + user.email]);
-                  setUserReview(undefined);
-                  setSuccessMsgs("Your review was deleted successfully.");
+                  setLoading(true);
+                  deleteReview.mutate();
                 }}
               />
             </div>

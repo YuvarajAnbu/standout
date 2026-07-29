@@ -24,7 +24,13 @@ async function shutdown(signal) {
 }
 
 async function start() {
-  requireEnvironment(["MONGODB_URI", "JWT_SECRET"]);
+  requireEnvironment([
+    "MONGODB_URI",
+    "JWT_SECRET",
+    "CLOUDINARY_CLOUD_NAME",
+    "CLOUDINARY_API_KEY",
+    "CLOUDINARY_API_SECRET",
+  ]);
   await connectDatabase();
   server = createApp().listen(port, () => console.info(`Server listening on ${port}`));
 }
