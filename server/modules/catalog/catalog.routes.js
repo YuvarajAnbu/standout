@@ -146,6 +146,35 @@ function currentMonth() {
   return Number(`${now.getUTCFullYear()}${now.getUTCMonth() + 1}`);
 }
 
+function trendingSelection(query, hasCurrentSales) {
+  if (!hasCurrentSales) {
+    return {
+      match: { sales: { $gte: 1 }, ...stockMatch(query) },
+      sort: sortFrom(query, { sales: -1, _id: 1 }),
+      projection: { ...listProjection, sales: 1 },
+    };
+  }
+
+  const month = currentMonth();
+  return {
+    match: {
+      salesPerMonth: { $elemMatch: { month, sales: { $gte: 1 } } },
+      ...stockMatch(query),
+    },
+    sort: sortFrom(query, { "salesPerMonth.sales": -1, _id: 1 }),
+    projection: {
+      ...listProjection,
+      salesPerMonth: {
+        $filter: {
+          input: "$salesPerMonth",
+          as: "entry",
+          cond: { $eq: ["$$entry.month", month] },
+        },
+      },
+    },
+  };
+}
+
 router.get("/best-seller", asyncHandler(async (req, res) => {
   const match = { sales: { $gte: 1 }, ...stockMatch(req.query) };
   res.json(await catalogResponse({
@@ -158,21 +187,15 @@ router.get("/best-seller", asyncHandler(async (req, res) => {
 
 router.get("/trending", asyncHandler(async (req, res) => {
   const month = currentMonth();
-  const match = {
+  const currentMatch = {
     salesPerMonth: { $elemMatch: { month, sales: { $gte: 1 } } },
     ...stockMatch(req.query),
   };
-  res.json(await catalogResponse({
-    match,
-    query: req.query,
-    sort: sortFrom(req.query, { "salesPerMonth.sales": -1, _id: 1 }),
-    projection: {
-      ...listProjection,
-      salesPerMonth: {
-        $filter: { input: "$salesPerMonth", as: "entry", cond: { $eq: ["$$entry.month", month] } },
-      },
-    },
-  }));
+  const selection = trendingSelection(
+    req.query,
+    Boolean(await Product.exists(currentMatch)),
+  );
+  res.json(await catalogResponse({ ...selection, query: req.query }));
 }));
 
 router.get("/reviews", auth, asyncHandler(async (req, res) => {
@@ -355,4 +378,5 @@ module.exports.helpers = {
   commaList,
   currentMonth,
   stockMatch,
+  trendingSelection,
 };

@@ -30,6 +30,29 @@ test("trending month follows the current UTC year and month", () => {
   assert.equal(helpers.currentMonth(), Number(`${now.getUTCFullYear()}${now.getUTCMonth() + 1}`));
 });
 
+test("trending falls back to all completed-order sales", () => {
+  assert.deepEqual(
+    helpers.trendingSelection({ color: "ffffff" }, false),
+    {
+      match: {
+        sales: { $gte: 1 },
+        stock: { $elemMatch: { color: { $in: ["#ffffff"] } } },
+      },
+      sort: { sales: -1, _id: 1 },
+      projection: {
+        _id: 1,
+        name: 1,
+        price: 1,
+        stock: 1,
+        createdAt: 1,
+        averageRating: { $avg: "$reviews.rating" },
+        totalRatings: { $size: { $ifNull: ["$reviews", []] } },
+        sales: 1,
+      },
+    },
+  );
+});
+
 test("catalog products, count, and filters come from one aggregation", async () => {
   const originalAggregate = Product.aggregate;
   let aggregation;
