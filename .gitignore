@@ -9,6 +9,11 @@ client/dist
 client/.vite
 client/coverage
 
+# Component styles are authored in SCSS and compiled by Vite.
+client/src/**/*.css
+!client/src/shared/styles/global.css
+client/src/**/*.css.map
+
 # Logs
 npm-debug.log*
 yarn-debug.log*
