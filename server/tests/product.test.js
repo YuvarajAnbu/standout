@@ -1,6 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { helpers } = require("../routes/product");
+const { helpers } = require("#modules/catalog/catalog.routes");
 
 test("product filter parsing ignores empty entries", () => {
   assert.deepEqual(helpers.commaList("men,, jackets "), ["men", "jackets"]);

@@ -1,12 +1,20 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
-const User = require("../models/User");
-const Order = require("../models/Order");
-const auth = require("./middleWares/auth");
-const asyncHandler = require("../utils/asyncHandler");
-const HttpError = require("../utils/httpError");
-const { clearAuthCookies, setAuthCookie } = require("../utils/cookies");
-const { asBoolean, asEmail, asNonEmptyString, asObjectId } = require("../utils/validation");
+const User = require("#modules/users/user.model");
+const Order = require("#modules/orders/order.model");
+const auth = require("#modules/auth/auth.middleware");
+const asyncHandler = require("#shared/http/asyncHandler");
+const HttpError = require("#shared/errors/HttpError");
+const {
+  clearAuthCookies,
+  setAuthCookie,
+} = require("#modules/auth/auth.cookies");
+const {
+  asBoolean,
+  asEmail,
+  asNonEmptyString,
+  asObjectId,
+} = require("#shared/validation/index");
 
 const router = express.Router();
 const hashRounds = Math.min(14, Math.max(10, Number(process.env.BCRYPT_ROUNDS) || 12));

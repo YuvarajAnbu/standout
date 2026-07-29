@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const HttpError = require("./httpError");
+const HttpError = require("#shared/errors/HttpError");
 
 function asNonEmptyString(value, field, { max = 255 } = {}) {
   if (typeof value !== "string" || !value.trim() || value.trim().length > max) {

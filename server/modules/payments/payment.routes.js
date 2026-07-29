@@ -1,12 +1,12 @@
 const express = require("express");
-const gateway = require("../config/braintree");
-const Product = require("../models/Product");
-const Order = require("../models/Order");
-const User = require("../models/User");
-const auth = require("./middleWares/auth");
-const asyncHandler = require("../utils/asyncHandler");
-const HttpError = require("../utils/httpError");
-const { asObjectId } = require("../utils/validation");
+const gateway = require("#infrastructure/payments/braintree");
+const Product = require("#modules/catalog/product.model");
+const Order = require("#modules/orders/order.model");
+const User = require("#modules/users/user.model");
+const auth = require("#modules/auth/auth.middleware");
+const asyncHandler = require("#shared/http/asyncHandler");
+const HttpError = require("#shared/errors/HttpError");
+const { asObjectId } = require("#shared/validation/index");
 
 const router = express.Router();
 const TAX_RATE = 0.02;

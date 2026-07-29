@@ -1,12 +1,15 @@
 const express = require("express");
 const path = require("node:path");
-const userRouter = require("./routes/user");
-const productRouter = require("./routes/product");
-const paymentRouter = require("./routes/payment");
-const securityHeaders = require("./middleware/security");
-const createRateLimit = require("./middleware/rateLimit");
-const { errorHandler, notFound } = require("./middleware/error");
-const { isProduction } = require("./config/env");
+const userRouter = require("#modules/users/user.routes");
+const productRouter = require("#modules/catalog/catalog.routes");
+const paymentRouter = require("#modules/payments/payment.routes");
+const securityHeaders = require("#shared/http/security.middleware");
+const createRateLimit = require("#shared/http/rateLimit.middleware");
+const {
+  errorHandler,
+  notFound,
+} = require("#shared/http/error.middleware");
+const { isProduction } = require("#config/env");
 
 function createApp() {
   const app = express();
@@ -29,7 +32,7 @@ function createApp() {
   app.use("/payment", paymentRouter);
 
   if (isProduction) {
-    const clientDist = path.join(__dirname, "../client/dist");
+    const clientDist = path.join(__dirname, "../../client/dist");
     app.use(express.static(clientDist, { immutable: true, maxAge: "1y", index: false }));
     app.get("/{*splat}", (req, res, next) => {
       if (req.path.startsWith("/user/") || req.path.startsWith("/product/") || req.path.startsWith("/payment/")) {

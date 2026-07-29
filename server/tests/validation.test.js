@@ -1,7 +1,11 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { asEmail, asObjectId, pagination } = require("../utils/validation");
-const { readCookies } = require("../routes/middleWares/auth");
+const {
+  asEmail,
+  asObjectId,
+  pagination,
+} = require("#shared/validation/index");
+const { readCookies } = require("#modules/auth/auth.middleware");
 
 test("pagination applies defaults and upper bounds", () => {
   assert.deepEqual(pagination({}), { page: 1, limit: 20, skip: 0 });

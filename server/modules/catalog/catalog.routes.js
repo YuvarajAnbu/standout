@@ -1,12 +1,12 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const Product = require("../models/Product");
-const User = require("../models/User");
-const Order = require("../models/Order");
-const auth = require("./middleWares/auth");
-const asyncHandler = require("../utils/asyncHandler");
-const HttpError = require("../utils/httpError");
-const { asObjectId, pagination } = require("../utils/validation");
+const Product = require("#modules/catalog/product.model");
+const User = require("#modules/users/user.model");
+const Order = require("#modules/orders/order.model");
+const auth = require("#modules/auth/auth.middleware");
+const asyncHandler = require("#shared/http/asyncHandler");
+const HttpError = require("#shared/errors/HttpError");
+const { asObjectId, pagination } = require("#shared/validation/index");
 
 const router = express.Router();
 const NO_MATCH = ";0.hjgbhj";

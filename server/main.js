@@ -1,6 +1,9 @@
-const { port, requireEnvironment } = require("./config/env");
-const { createApp } = require("./app");
-const { connectDatabase, disconnectDatabase } = require("./config/mongoose");
+const { port, requireEnvironment } = require("#config/env");
+const { createApp } = require("#app/createApp");
+const {
+  connectDatabase,
+  disconnectDatabase,
+} = require("#infrastructure/database/mongoose");
 
 let server;
 let shuttingDown = false;

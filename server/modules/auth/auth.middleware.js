@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
-const User = require("../../models/User");
-const { COOKIE_NAME } = require("../../utils/cookies");
+const User = require("#modules/users/user.model");
+const { COOKIE_NAME } = require("#modules/auth/auth.cookies");
 
 function readCookies(header = "") {
   return Object.fromEntries(

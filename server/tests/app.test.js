@@ -1,6 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { createApp } = require("../app");
+const { createApp } = require("#app/createApp");
 
 async function withServer(run) {
   const server = createApp().listen(0);

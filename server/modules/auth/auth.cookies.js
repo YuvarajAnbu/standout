@@ -1,4 +1,4 @@
-const { isProduction } = require("../config/env");
+const { isProduction } = require("#config/env");
 
 const COOKIE_NAME = isProduction ? "__Host-token" : "token";
 
