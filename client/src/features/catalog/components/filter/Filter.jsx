@@ -17,7 +17,6 @@ function Filter({
   setBlackBox,
   noResults,
   setLastClicked,
-  setUpdate,
   hide,
 }) {
 
@@ -86,7 +85,6 @@ function Filter({
           hideFilter,
           setHideFilter,
           setLastClicked,
-          setUpdate,
         }}
       />
       <Color
@@ -97,7 +95,6 @@ function Filter({
           setHideFilter,
           itemStock,
           setLastClicked,
-          setUpdate,
           colors,
         }}
       />
@@ -109,7 +106,6 @@ function Filter({
           setHideFilter,
           itemStock,
           setLastClicked,
-          setUpdate,
         }}
       />
       <button

@@ -12,12 +12,12 @@ function ShopItem({
   setStockIndex,
   setErrorMsgs,
   setSuccessMsgs,
-  setUpdate,
 }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [hideColors, setHideColors] = useState(true);
   const [hideToolTip, setHideToolTip] = useState(true);
+  const selectedStockIndex = stockIndex[index] ?? 0;
   const deleteProduct = useMutation({
     mutationFn: () =>
       apiRequest(`/product/${el._id}`, {
@@ -31,7 +31,6 @@ function ShopItem({
       ]);
       setSuccessMsgs("Item deleted successfully");
       setHideToolTip(true);
-      setUpdate((current) => current + 1);
     },
     onError: (error) =>
       setErrorMsgs(error.message || "Could not delete this product"),
@@ -61,7 +60,7 @@ function ShopItem({
     >
       <div className="shop__items-container__items__item__image-container">
         <img
-          src={imgPrefix(300) + el.stock[stockIndex[index]].images[0]}
+          src={imgPrefix(300) + el.stock[selectedStockIndex].images[0]}
           alt={el.name}
           loading="lazy"
           decoding="async"
@@ -168,7 +167,7 @@ function ShopItem({
               <div
                 key={i}
                 className={
-                  stockIndex[index] === i
+                  selectedStockIndex === i
                     ? "shop__items-container__items__item__colors__color-box shop__items-container__items__item__colors__color-box--active"
                     : "shop__items-container__items__item__colors__color-box"
                 }
@@ -197,7 +196,7 @@ function ShopItem({
             ))}
           </div>
           <p className="shop__items-container__items__item__sizes">
-            {sizeArray(el.stock[stockIndex[index]].sizeRemaining)}
+            {sizeArray(el.stock[selectedStockIndex].sizeRemaining)}
           </p>
         </div>
       )}

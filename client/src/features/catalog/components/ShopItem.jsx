@@ -5,6 +5,7 @@ import { imgPrefix } from "@/shared/utils/images";
 
 function ShopItem({ el, stockIndex, index, setStockIndex }) {
   const [hideColors, setHideColors] = useState(true);
+  const selectedStockIndex = stockIndex[index] ?? 0;
 
   const sizeArray = (arr) => {
     let str = "";
@@ -31,7 +32,7 @@ function ShopItem({ el, stockIndex, index, setStockIndex }) {
       <Link to={`/item/${el._id}`}>
         <div className="shop__items-container__items__item__image-container">
           <img
-            src={imgPrefix(300) + el.stock[stockIndex[index]].images[0]}
+            src={imgPrefix(300) + el.stock[selectedStockIndex].images[0]}
             alt={el.name}
             loading="lazy"
             decoding="async"
@@ -96,7 +97,7 @@ function ShopItem({ el, stockIndex, index, setStockIndex }) {
               <div
                 key={i}
                 className={
-                  stockIndex[index] === i
+                  selectedStockIndex === i
                     ? "shop__items-container__items__item__colors__color-box shop__items-container__items__item__colors__color-box--active"
                     : "shop__items-container__items__item__colors__color-box"
                 }
@@ -125,7 +126,7 @@ function ShopItem({ el, stockIndex, index, setStockIndex }) {
             ))}
           </div>
           <p className="shop__items-container__items__item__sizes">
-            {sizeArray(el.stock[stockIndex[index]].sizeRemaining)}
+            {sizeArray(el.stock[selectedStockIndex].sizeRemaining)}
           </p>
         </div>
       )}

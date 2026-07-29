@@ -9,7 +9,6 @@ function Color({
   setHideFilter,
   itemStock,
   setLastClicked,
-  setUpdate,
   colors,
 }) {
   const toggleSection = () =>
@@ -22,7 +21,6 @@ function Color({
         : [...prev.color, color.slice(1)],
     }));
     setLastClicked("color");
-    setUpdate((prev) => prev + 1);
   };
 
   return (

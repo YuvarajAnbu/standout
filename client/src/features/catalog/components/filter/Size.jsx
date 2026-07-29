@@ -8,7 +8,6 @@ function Size({
   setHideFilter,
   itemStock,
   setLastClicked,
-  setUpdate,
 }) {
   const toggleSection = () =>
     setHideFilter((prev) => ({ ...prev, size: !prev.size }));
@@ -20,7 +19,6 @@ function Size({
         : [...prev.size, size],
     }));
     setLastClicked("size");
-    setUpdate((prev) => prev + 1);
   };
 
   return (

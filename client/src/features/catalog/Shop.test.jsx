@@ -3,12 +3,11 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { queryClient } from "@/shared/api/queryClient";
-import { useAppStore } from "@/app/store/useAppStore";
 import Shop from "@/features/catalog/Shop";
 
-const localProduct = {
-  _id: "local-shirt",
-  name: "Local shirt",
+const product = {
+  _id: "507f1f77bcf86cd799439011",
+  name: "Server shirt",
   price: 2500,
   catagory: "women",
   type: "tops",
@@ -27,28 +26,27 @@ const localProduct = {
 describe("Shop", () => {
   beforeEach(() => {
     queryClient.clear();
-    useAppStore.setState({ userProducts: [localProduct], hideProducts: [] });
     vi.stubGlobal(
       "fetch",
-      vi.fn((url) =>
+      vi.fn(() =>
         Promise.resolve({
           ok: true,
           status: 200,
           statusText: "OK",
           headers: { get: () => "application/json" },
           json: () =>
-            Promise.resolve(
-              String(url).includes("/product/filter/")
-                ? { colors: [], sizes: [] }
-                : { count: 0, products: [] },
-            ),
+            Promise.resolve({
+              count: 1,
+              products: [product],
+              filters: { colors: ["#000000"], sizes: ["M"] },
+            }),
           text: () => Promise.resolve(""),
         }),
       ),
     );
   });
 
-  it("combines local products with cached server results", async () => {
+  it("renders products and filters from one catalog response", async () => {
     render(
       <QueryClientProvider client={queryClient}>
         <MemoryRouter>
@@ -57,7 +55,8 @@ describe("Shop", () => {
       </QueryClientProvider>,
     );
 
-    expect(await screen.findByText("Local shirt")).toBeInTheDocument();
+    expect(await screen.findByText("Server shirt")).toBeInTheDocument();
     expect(screen.getByText("1/1 products")).toBeInTheDocument();
+    expect(fetch).toHaveBeenCalledTimes(1);
   });
 });

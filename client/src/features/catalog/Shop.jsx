@@ -2,32 +2,23 @@ import React, {
   useState,
   useEffect,
   useCallback,
-  useEffectEvent,
   useMemo,
 } from "react";
 import "@/features/catalog/Shop.scss";
-import { cachedGet } from "@/shared/api/queries";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/shared/api/client";
 import { queryKeys } from "@/shared/api/queries";
 import Filter from "@/features/catalog/components/filter/Filter";
 import ShopItem from "@/features/catalog/components/ShopItem";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useAppStore } from "@/app/store/useAppStore";
 import { useMediaQuery } from "@/shared/hooks/useMediaQuery";
 import {
   createStockIndex,
-  filterLocalProducts,
-  sortCatalogProducts,
+  reconcileCatalogFilter,
 } from "@/features/catalog/utils/catalog";
-import { reportError } from "@/shared/utils/logger";
 import { handleKeyboardActivation } from "@/shared/utils/accessibility";
 
 function Shop({ title, link }) {
-  // const history = useHistory();
-  const userProducts = useAppStore((state) => state.userProducts);
-  const hideProducts = useAppStore((state) => state.hideProducts);
-
   // getting colors and sizes from server on page load
   const [itemStock, setItemStock] = useState({
     colors: [],
@@ -60,8 +51,6 @@ function Shop({ title, link }) {
 
   const isDesktop = useMediaQuery("(min-width: 1000px)");
 
-  const [update, setUpdate] = useState(0);
-
   const [noRes, setNoRes] = useState(false);
   const toggleMobileFilters = () => {
     setShowFilters((current) => !current);
@@ -91,31 +80,17 @@ function Shop({ title, link }) {
       size: [],
     });
     setLastClicked("");
-    setUpdate((prev) => prev + 1);
     setNoRes(false);
   }, []);
 
   useEffect(reset, [link, reset]);
 
-  const routeParts = useMemo(() => link.split("/"), [link]);
-  const localProducts = useMemo(
-    () =>
-      routeParts.length === 2
-        ? filterLocalProducts(userProducts, {
-            categories: routeParts[0],
-            types: routeParts[1],
-            filter,
-          })
-        : [],
-    [filter, routeParts, userProducts],
-  );
-
   const productsQuery = useInfiniteQuery({
-    queryKey: queryKeys.products({ link, filter, hideProducts }),
+    queryKey: queryKeys.products({ link, filter, lastClicked }),
     initialPageParam: 1,
     queryFn: ({ pageParam, signal }) =>
       apiRequest(
-        `/product/${link}?page=${pageParam}&limit=${limit}&sort=${filter.sort}&color=${filter.color}&size=${filter.size}&except=${hideProducts}`,
+        `/product/${link}?page=${pageParam}&limit=${limit}&sort=${filter.sort}&color=${filter.color}&size=${filter.size}&filter=${lastClicked}&includeFilters=${pageParam === 1}`,
         { signal },
       ),
     getNextPageParam: (lastPage, pages) => {
@@ -131,161 +106,23 @@ function Shop({ title, link }) {
     () => productsQuery.data?.pages.flatMap((pageData) => pageData.products) || [],
     [productsQuery.data],
   );
-  const items = useMemo(() => {
-    const combined = [...sortCatalogProducts(localProducts), ...serverProducts];
-    return filter.sort ? sortCatalogProducts(combined, filter.sort) : combined;
-  }, [filter.sort, localProducts, serverProducts]);
-  const itemsCount =
-    (productsQuery.data?.pages[0]?.count || 0) + localProducts.length;
+  const items = serverProducts;
+  const itemsCount = productsQuery.data?.pages[0]?.count || 0;
 
   useEffect(() => setStockIndex(createStockIndex(items)), [items]);
 
-  const getFilters = useCallback(() => {
-    cachedGet(
-        `/product/filter/${link}?&color=${filter.color}&size=${filter.size}&filter=${lastClicked}&except=${hideProducts}`,
-        { scope: "shop-results", cancelPrevious: true, staleTime: 0 }
-      )
-      .then((res) => {
-        //for client use
-        if (link.split("/").length === 2) {
-          const products = userProducts.filter(
-            (el) =>
-              (el.catagory === link.split("/")[0] || el.catagory === "both") &&
-              el.type === link.split("/")[1]
-          );
-          let filteredProducts = [];
-          if (filter.color.length < 1 && filter.size.length < 1) {
-            filteredProducts = products;
-          } else {
-            if (
-              !(lastClicked.includes("color") && filter.color.length > 0) &&
-              !(lastClicked.includes("size") && filter.size.length > 0)
-            ) {
-              filteredProducts = products;
-            } else {
-              for (let i = 0; i < products.length; i++) {
-                for (let j = 0; j < products[i].stock.length; j++) {
-                  if (
-                    filteredProducts.filter((el) => el._id === products[i]._id)
-                      .length > 0
-                  ) {
-                    break;
-                  }
-                  if (
-                    filter.color.includes(
-                      products[i].stock[j].color.replace("#", "")
-                    ) &&
-                    lastClicked.includes("color") &&
-                    filter.color.length > 0
-                  ) {
-                    filteredProducts.push(products[i]);
-                    break;
-                  }
-                  if (lastClicked.includes("size") && filter.size.length > 0) {
-                    for (
-                      let k = 0;
-                      k < products[i].stock[j].sizeRemaining.length;
-                      k++
-                    ) {
-                      if (
-                        filter.size.includes(
-                          products[i].stock[j].sizeRemaining[k].size
-                        )
-                      ) {
-                        filteredProducts.push(products[i]);
-                        break;
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-          const filterArr = {
-            colors: [],
-            sizes: [],
-          };
-          filteredProducts.forEach(({ stock }) => {
-            stock.forEach((item) => {
-              if (
-                !lastClicked.includes("color") ||
-                (filter.size.length === 0 && lastClicked.includes("size"))
-              ) {
-                if (!filterArr.colors.includes(item.color)) {
-                  filterArr.colors.push(item.color);
-                }
-              }
-              if (
-                !lastClicked.includes("size") ||
-                (filter.color.length === 0 && lastClicked.includes("color"))
-              ) {
-                item.sizeRemaining.forEach(({ size }) => {
-                  if (!filterArr.sizes.includes(size)) {
-                    filterArr.sizes.push(size);
-                  }
-                });
-              }
-            });
-          });
-          const filteredArr = {
-            colors: [...res.data.colors],
-            sizes: [...res.data.sizes],
-          };
-          Object.keys(filterArr).forEach((el) => {
-            filterArr[el].forEach((e) => {
-              if (!filteredArr[el].includes(e)) {
-                filteredArr[el].push(e);
-              }
-            });
-          });
+  const firstPage = productsQuery.data?.pages[0];
+  useEffect(() => {
+    if (!firstPage) return;
+    setItemStock((current) => ({ ...current, ...firstPage.filters }));
+    const nextFilter = reconcileCatalogFilter(filter, firstPage.filters);
+    if (nextFilter !== filter) {
+      setFilter(nextFilter);
+    } else if (firstPage.count === 0) {
+      setNoRes(true);
+    }
+  }, [filter, firstPage]);
 
-          res.data = filteredArr;
-
-          Object.keys(res.data).forEach((el) => {
-            if (res.data[el].length < 1) {
-              delete res.data[el];
-            }
-          });
-        }
-
-        if (Object.keys(res.data).length > 0) {
-          setFilter((prev) => {
-            const next = { ...prev };
-            Object.keys(res.data).forEach((el) => {
-              if (el === "sizes") {
-                next.size = prev.size.filter((k) => res.data[el].includes(k));
-              } else if (el === "colors") {
-                next.color = prev.color.filter((k) =>
-                  res.data[el].includes("#" + k)
-                );
-              }
-            });
-
-            return next;
-          });
-          setItemStock((prev) => {
-            return {
-              ...prev,
-              ...res.data,
-            };
-          });
-        } else {
-          setNoRes(true);
-          // history.replace("/404");
-          // navigate("/404", { replace: true });
-        }
-      })
-      .catch((error) => reportError(error, { area: "shop filters" }));
-  }, [
-    filter,
-    lastClicked,
-    link,
-    userProducts,
-    hideProducts,
-  ]);
-
-  const runGetFilters = useEffectEvent(getFilters);
-  useEffect(() => runGetFilters(), [update]);
 
   const limitArr = () => {
     let arr = [];
@@ -309,7 +146,6 @@ function Shop({ title, link }) {
           setShowFilters,
           setBlackBox,
           setLastClicked,
-          setUpdate,
         }}
       />
       <div className="shop__items-container">

@@ -8,14 +8,12 @@ function SortBy({
   hideFilter,
   setHideFilter,
   setLastClicked,
-  setUpdate,
 }) {
   const toggleSection = () =>
     setHideFilter((prev) => ({ ...prev, sort: !prev.sort }));
   const toggleSort = (sort) => {
     setFilter((prev) => ({ ...prev, sort: prev.sort === sort ? "" : sort }));
     setLastClicked("sort");
-    setUpdate((prev) => prev + 1);
   };
 
   return (

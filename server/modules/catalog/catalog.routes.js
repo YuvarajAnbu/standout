@@ -92,6 +92,7 @@ function sortFrom(query, fallback) {
 
 async function catalogResponse({ match, query, sort, projection = listProjection }) {
   const { limit, skip } = pagination(query);
+  const includeFilters = query.includeFilters !== "false";
   const [result] = await Product.aggregate([
     { $match: match },
     {
@@ -103,35 +104,46 @@ async function catalogResponse({ match, query, sort, projection = listProjection
           { $project: projection },
         ],
         metadata: [{ $count: "count" }],
+        filterValues: includeFilters
+          ? [
+              { $unwind: "$stock" },
+              { $unwind: "$stock.sizeRemaining" },
+              { $match: { "stock.sizeRemaining.remaining": { $gt: 0 } } },
+              {
+                $group: {
+                  _id: null,
+                  colors: { $addToSet: "$stock.color" },
+                  sizes: { $addToSet: "$stock.sizeRemaining.size" },
+                },
+              },
+            ]
+          : [{ $limit: 0 }],
       },
     },
   ]);
-  return { products: result.products, count: result.metadata[0]?.count || 0 };
+  let filters;
+  if (includeFilters) {
+    const available = result.filterValues[0] || { colors: [], sizes: [] };
+    const selectedDimension =
+      typeof query.filter === "string" ? query.filter : "";
+    filters = {};
+    if (!selectedDimension.includes("color") || !commaList(query.color).length) {
+      filters.colors = available.colors.sort();
+    }
+    if (!selectedDimension.includes("size") || !commaList(query.size).length) {
+      filters.sizes = available.sizes.sort();
+    }
+  }
+  return {
+    products: result.products,
+    count: result.metadata[0]?.count || 0,
+    ...(filters ? { filters } : {}),
+  };
 }
 
 function currentMonth() {
   const now = new Date();
   return Number(`${now.getUTCFullYear()}${now.getUTCMonth() + 1}`);
-}
-
-async function availableFilters(match, query) {
-  const documents = await Product.find(match, "stock").lean();
-  const colors = new Set();
-  const sizes = new Set();
-  for (const product of documents) {
-    for (const stock of product.stock || []) {
-      if ((stock.sizeRemaining || []).some((entry) => entry.remaining > 0)) colors.add(stock.color);
-      for (const entry of stock.sizeRemaining || []) {
-        if (entry.remaining > 0) sizes.add(entry.size);
-      }
-    }
-  }
-
-  const selectedDimension = typeof query.filter === "string" ? query.filter : "";
-  const result = {};
-  if (!selectedDimension.includes("color") || !commaList(query.color).length) result.colors = [...colors].sort();
-  if (!selectedDimension.includes("size") || !commaList(query.size).length) result.sizes = [...sizes].sort();
-  return result;
 }
 
 router.get("/best-seller", asyncHandler(async (req, res) => {
@@ -142,11 +154,6 @@ router.get("/best-seller", asyncHandler(async (req, res) => {
     sort: sortFrom(req.query, { sales: -1, _id: 1 }),
     projection: { ...listProjection, sales: 1 },
   }));
-}));
-
-router.get("/filter/best-seller", asyncHandler(async (req, res) => {
-  const match = { sales: { $gte: 1 }, ...stockMatch(req.query) };
-  res.json(await availableFilters(match, req.query));
 }));
 
 router.get("/trending", asyncHandler(async (req, res) => {
@@ -166,14 +173,6 @@ router.get("/trending", asyncHandler(async (req, res) => {
       },
     },
   }));
-}));
-
-router.get("/filter/trending", asyncHandler(async (req, res) => {
-  const match = {
-    salesPerMonth: { $elemMatch: { month: currentMonth(), sales: { $gte: 1 } } },
-    ...stockMatch(req.query),
-  };
-  res.json(await availableFilters(match, req.query));
 }));
 
 router.get("/reviews", auth, asyncHandler(async (req, res) => {
@@ -322,18 +321,15 @@ router.delete("/:id/review", auth.requireAuth, asyncHandler(async (req, res) => 
   res.status(204).end();
 }));
 
-router.get("/filter/:catagory/:type", asyncHandler(async (req, res) => {
-  const match = {
-    ...categoryMatch(req.params.catagory, req.params.type),
-    ...exclusions(req.query),
-    ...stockMatch(req.query),
-  };
-  res.json(await availableFilters(match, req.query));
-}));
-
 router.get("/:catagory/:type", asyncHandler(async (req, res) => {
   const categories = categoryMatch(req.params.catagory, req.params.type);
-  if (Object.keys(categories).length === 0) return res.json({ products: [], count: 0 });
+  if (Object.keys(categories).length === 0) {
+    return res.json({
+      products: [],
+      count: 0,
+      filters: { colors: [], sizes: [] },
+    });
+  }
   const match = { ...categories, ...exclusions(req.query), ...stockMatch(req.query) };
   return res.json(await catalogResponse({
     match,
@@ -353,4 +349,10 @@ router.get("/:id", asyncHandler(async (req, res) => {
 }));
 
 module.exports = router;
-module.exports.helpers = { categoryMatch, commaList, currentMonth, stockMatch };
+module.exports.helpers = {
+  catalogResponse,
+  categoryMatch,
+  commaList,
+  currentMonth,
+  stockMatch,
+};

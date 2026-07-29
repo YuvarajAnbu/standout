@@ -19,7 +19,10 @@ function ProductCarousel({
   const { data, isPending, isError } = useQuery({
     queryKey: queryKeys.products({ collection, limit }),
     queryFn: ({ signal }) =>
-      apiRequest(`/product/${collection}/?page=1&limit=${limit}`, { signal }),
+      apiRequest(
+        `/product/${collection}/?page=1&limit=${limit}&includeFilters=false`,
+        { signal },
+      ),
     staleTime: 5 * 60_000,
   });
   const items = data?.products || [];

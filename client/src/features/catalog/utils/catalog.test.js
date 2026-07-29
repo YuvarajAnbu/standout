@@ -1,49 +1,23 @@
 import { describe, expect, it } from "vitest";
 import {
-  collectStockOptions,
-  filterLocalProducts,
-  sortCatalogProducts,
+  createStockIndex,
+  reconcileCatalogFilter,
 } from "@/features/catalog/utils/catalog";
 
-const products = [
-  {
-    _id: "one",
-    catagory: "women",
-    type: "tops",
-    price: 300,
-    createdAt: 1,
-    stock: [{ color: "#fff", sizeRemaining: [{ size: "M" }] }],
-  },
-  {
-    _id: "two",
-    catagory: "both",
-    type: "tops",
-    price: 100,
-    createdAt: 2,
-    stock: [{ color: "#000", sizeRemaining: [{ size: "L" }] }],
-  },
-];
-
 describe("catalog utilities", () => {
-  it("filters local products by route and stock selections", () => {
-    expect(
-      filterLocalProducts(products, {
-        categories: "women",
-        types: "tops",
-        filter: { color: ["000"], size: ["L"] },
-      }).map(({ _id }) => _id),
-    ).toEqual(["two"]);
+  it("creates a default stock selection for every product", () => {
+    expect(createStockIndex([{ _id: "one" }, { _id: "two" }])).toEqual({
+      0: 0,
+      1: 0,
+    });
   });
 
-  it("sorts without mutating and collects unique stock options", () => {
-    expect(sortCatalogProducts(products, "asc").map(({ _id }) => _id)).toEqual([
-      "two",
-      "one",
-    ]);
-    expect(products[0]._id).toBe("one");
-    expect(collectStockOptions(products)).toEqual({
-      colors: ["#fff", "#000"],
-      sizes: ["M", "L"],
-    });
+  it("removes selections invalidated by another filter dimension", () => {
+    expect(
+      reconcileCatalogFilter(
+        { sort: "", color: ["000000"], size: ["M"] },
+        { colors: ["#ffffff"] },
+      ),
+    ).toEqual({ sort: "", color: [], size: ["M"] });
   });
 });

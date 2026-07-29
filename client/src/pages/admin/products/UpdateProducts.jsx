@@ -2,15 +2,12 @@ import React, {
   useEffect,
   useState,
   useCallback,
-  useEffectEvent,
   useMemo,
 } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { cachedGet } from "@/shared/api/queries";
 import Filter from "@/features/catalog/components/filter/Filter";
 import ShopItem from "@/pages/admin/products/components/ShopItem";
 import "@/features/catalog/Shop.scss";
-import { useAppStore } from "@/app/store/useAppStore";
 import products from "@/features/catalog/data/products";
 import pluralize from "pluralize";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -22,10 +19,8 @@ import { apiRequest } from "@/shared/api/client";
 import { queryKeys } from "@/shared/api/queries";
 import {
   createStockIndex,
-  filterLocalProducts,
-  sortCatalogProducts,
+  reconcileCatalogFilter,
 } from "@/features/catalog/utils/catalog";
-import { reportError } from "@/shared/utils/logger";
 import { handleKeyboardActivation } from "@/shared/utils/accessibility";
 
 const NO_MATCH = "__no_catalog_match__";
@@ -37,8 +32,6 @@ function UpdateProducts() {
   const navigate = useNavigate();
 
   const { uploadOptions } = products;
-  const userProducts = useAppStore((state) => state.userProducts);
-  const hideProducts = useAppStore((state) => state.hideProducts);
 
   const [input, setInput] = useState("");
   const [search, setSearch] = useState("");
@@ -89,7 +82,6 @@ function UpdateProducts() {
     dismissMessages,
   } = useTimedMessages();
 
-  const [update, setUpdate] = useState(0);
   const toggleMobileFilters = () => {
     setShowFilters((current) => !current);
     setBlackBox((current) => !current);
@@ -203,7 +195,6 @@ function UpdateProducts() {
       }
       setCatagory(catagories);
       setType(types);
-      setUpdate((prev) => prev + 1);
     }
   }, [search, uploadOptions]);
 
@@ -220,33 +211,23 @@ function UpdateProducts() {
     });
     setLastClicked("");
     setNoResults(false);
-    setUpdate((prev) => prev + 1);
   }, []);
 
   useEffect(reset, [search, reset]);
 
-  const localProducts = useMemo(
-    () =>
-      filterLocalProducts(userProducts, {
-        categories: catagory[0] === NO_MATCH ? [] : catagory,
-        types: type[0] === NO_MATCH ? [] : type,
-        filter,
-      }),
-    [catagory, filter, type, userProducts],
-  );
   const productsQuery = useInfiniteQuery({
     queryKey: queryKeys.products({
       adminSearch: search,
       catagory,
       type,
       filter,
-      hideProducts,
+      lastClicked,
     }),
     initialPageParam: 1,
     enabled: catagory.length > 0 && type.length > 0 && !noResults,
     queryFn: ({ pageParam, signal }) =>
       apiRequest(
-        `/product/${catagory}/${type}?page=${pageParam}&limit=${limit}&sort=${filter.sort}&color=${filter.color}&size=${filter.size}&except=${hideProducts}`,
+        `/product/${catagory}/${type}?page=${pageParam}&limit=${limit}&sort=${filter.sort}&color=${filter.color}&size=${filter.size}&filter=${lastClicked}&includeFilters=${pageParam === 1}`,
         { signal },
       ),
     getNextPageParam: (lastPage, pages) => {
@@ -261,196 +242,23 @@ function UpdateProducts() {
     () => productsQuery.data?.pages.flatMap((pageData) => pageData.products) || [],
     [productsQuery.data],
   );
-  const items = useMemo(() => {
-    const combined = [...sortCatalogProducts(localProducts), ...serverProducts];
-    return filter.sort ? sortCatalogProducts(combined, filter.sort) : combined;
-  }, [filter.sort, localProducts, serverProducts]);
-  const itemsCount =
-    (productsQuery.data?.pages[0]?.count || 0) + localProducts.length;
+  const items = serverProducts;
+  const itemsCount = productsQuery.data?.pages[0]?.count || 0;
 
   useEffect(() => setStockIndex(createStockIndex(items)), [items]);
 
-  const getFilters = useCallback(() => {
-    if (catagory.length > 0 && type.length > 0) {
-      if (catagory.includes(NO_MATCH) && type.includes(NO_MATCH)) {
-        setNoResults(true);
-      } else {
-        cachedGet(
-            `/product/filter/${catagory}/${type}?&color=${filter.color}&size=${filter.size}&filter=${lastClicked}&except=${hideProducts}`,
-            { scope: "admin-products", cancelPrevious: true, staleTime: 0 }
-          )
-          .then((res) => {
-            if (Object.keys(res.data).length < 1) {
-              setNoResults(true);
-              setItemStock({ colors: [], sizes: [] });
-            } else {
-              //for client use
-              if (catagory.length > 0 && type.length > 0) {
-                const filterObj = {};
-
-                if (catagory[0] !== NO_MATCH) {
-                  filterObj.catagory = [...catagory, "both"];
-                }
-                if (type[0] !== NO_MATCH) {
-                  filterObj.type = [...type];
-                }
-
-                let products = [];
-
-                if (Object.keys(filterObj).length === 2) {
-                  products = userProducts.filter(
-                    (e) =>
-                      filterObj.catagory.includes(e.catagory) &&
-                      filterObj.type.includes(e.type)
-                  );
-                } else if (Object.keys(filterObj).length === 1) {
-                  products = userProducts.filter((e) =>
-                    filterObj[Object.keys(filterObj)[0]].includes(
-                      e[Object.keys(filterObj)[0]]
-                    )
-                  );
-                }
-                let filteredProducts = [];
-                if (filter.color.length < 1 && filter.size.length < 1) {
-                  filteredProducts = products;
-                } else {
-                  if (
-                    !(
-                      lastClicked.includes("color") && filter.color.length > 0
-                    ) &&
-                    !(lastClicked.includes("size") && filter.size.length > 0)
-                  ) {
-                    filteredProducts = products;
-                  } else {
-                    for (let i = 0; i < products.length; i++) {
-                      for (let j = 0; j < products[i].stock.length; j++) {
-                        if (
-                          filteredProducts.filter(
-                            (el) => el._id === products[i]._id
-                          ).length > 0
-                        ) {
-                          break;
-                        }
-                        if (
-                          filter.color.includes(
-                            products[i].stock[j].color.replace("#", "")
-                          ) &&
-                          lastClicked.includes("color") &&
-                          filter.color.length > 0
-                        ) {
-                          filteredProducts.push(products[i]);
-                          break;
-                        }
-                        if (
-                          lastClicked.includes("size") &&
-                          filter.size.length > 0
-                        ) {
-                          for (
-                            let k = 0;
-                            k < products[i].stock[j].sizeRemaining.length;
-                            k++
-                          ) {
-                            if (
-                              filter.size.includes(
-                                products[i].stock[j].sizeRemaining[k].size
-                              )
-                            ) {
-                              filteredProducts.push(products[i]);
-                              break;
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-                const filterArr = {
-                  colors: [],
-                  sizes: [],
-                };
-                filteredProducts.forEach(({ stock }) => {
-                  stock.forEach((item) => {
-                    if (
-                      !lastClicked.includes("color") ||
-                      (filter.size.length === 0 && lastClicked.includes("size"))
-                    ) {
-                      if (!filterArr.colors.includes(item.color)) {
-                        filterArr.colors.push(item.color);
-                      }
-                    }
-                    if (
-                      !lastClicked.includes("size") ||
-                      (filter.color.length === 0 &&
-                        lastClicked.includes("color"))
-                    ) {
-                      item.sizeRemaining.forEach(({ size }) => {
-                        if (!filterArr.sizes.includes(size)) {
-                          filterArr.sizes.push(size);
-                        }
-                      });
-                    }
-                  });
-                });
-                const filteredArr = {
-                  colors: [...res.data.colors],
-                  sizes: [...res.data.sizes],
-                };
-                Object.keys(filterArr).forEach((el) => {
-                  filterArr[el].forEach((e) => {
-                    if (!filteredArr[el].includes(e)) {
-                      filteredArr[el].push(e);
-                    }
-                  });
-                });
-
-                res.data = filteredArr;
-
-                Object.keys(res.data).forEach((el) => {
-                  if (res.data[el].length < 1) {
-                    delete res.data[el];
-                  }
-                });
-              }
-              setFilter((prev) => {
-                const next = { ...prev };
-                Object.keys(res.data).forEach((el) => {
-                  if (el === "sizes") {
-                    next.size = prev.size.filter((k) =>
-                      res.data[el].includes(k)
-                    );
-                  } else if (el === "colors") {
-                    next.color = prev.color.filter((k) =>
-                      res.data[el].includes("#" + k)
-                    );
-                  }
-                });
-
-                return next;
-              });
-              setItemStock((prev) => {
-                return {
-                  ...prev,
-                  ...res.data,
-                };
-              });
-            }
-          })
-          .catch((error) =>
-            reportError(error, { area: "admin product filters" }),
-          );
-      }
+  const firstPage = productsQuery.data?.pages[0];
+  useEffect(() => {
+    if (!firstPage) return;
+    setItemStock((current) => ({ ...current, ...firstPage.filters }));
+    const nextFilter = reconcileCatalogFilter(filter, firstPage.filters);
+    if (nextFilter !== filter) {
+      setFilter(nextFilter);
+    } else if (firstPage.count === 0) {
+      setNoResults(true);
     }
-  }, [
-    filter,
-    lastClicked,
-    catagory,
-    type,
-    userProducts,
-    hideProducts,
-  ]);
+  }, [filter, firstPage]);
 
-  const runGetFilters = useEffectEvent(getFilters);
-  useEffect(() => runGetFilters(), [update]);
 
   const limitArr = () => {
     let arr = [];
@@ -476,7 +284,6 @@ function UpdateProducts() {
           setBlackBox,
           noResults,
           setLastClicked,
-          setUpdate,
         }}
       />
       <div className="shop__items-container">
@@ -581,7 +388,6 @@ function UpdateProducts() {
                       setStockIndex,
                       setErrorMsgs,
                       setSuccessMsgs,
-                      setUpdate,
                     }}
                   />
                 ))}
