@@ -4,6 +4,7 @@ import { imgPrefix } from "@/shared/utils/images";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { getColorName } from "@/features/catalog/utils/colors";
 import { unlockPageScroll } from "@/shared/utils/pageScroll";
+import { truncate } from "@/shared/utils/text";
 
 function CartItem({ item, setCart, setIfHide, setBlackBox, colors }) {
   return (
@@ -40,7 +41,7 @@ function CartItem({ item, setCart, setIfHide, setBlackBox, colors }) {
             }, 300);
           }}
         >
-          {item.name.length > 20 ? item.name.slice(0, 18) + "..." : item.name}
+          {truncate(item.name, 20)}
         </Link>
         <p className="nav-bar__tools__cart__items-container__items__item__info__price">
           {`$${((item.price * item.quantity) / 100).toFixed(2)}`}

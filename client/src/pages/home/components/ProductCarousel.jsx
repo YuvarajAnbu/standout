@@ -7,6 +7,7 @@ import { imgPrefix } from "@/shared/utils/images";
 import { apiRequest } from "@/shared/api/client";
 import { queryKeys } from "@/shared/api/queries";
 import RatingStars from "@/shared/components/ui/RatingStars";
+import { truncate } from "@/shared/utils/text";
 
 function ProductCarousel({
   collection = "best-seller",
@@ -143,9 +144,7 @@ function ProductCarousel({
                     </div>
                     <Link to={`/item/${el._id}`}>
                       <p className="name">
-                        {el.name.length > 15
-                          ? el.name.slice(0, 12) + "..."
-                          : el.name}
+                        {truncate(el.name, 15)}
                       </p>
                     </Link>
                     <p
