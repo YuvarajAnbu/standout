@@ -4,7 +4,6 @@ import { imgPrefix } from "@/shared/utils/images";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { getColorName } from "@/features/catalog/utils/colors";
 import { unlockPageScroll } from "@/shared/utils/pageScroll";
-import { truncate } from "@/shared/utils/text";
 
 function CartItem({ item, setCart, setIfHide, setBlackBox, colors }) {
   return (
@@ -31,8 +30,9 @@ function CartItem({ item, setCart, setIfHide, setBlackBox, colors }) {
       </div>
       <div className="nav-bar__tools__cart__items-container__items__item__info">
         <Link
-          className="nav-bar__tools__cart__items-container__items__item__info__name"
+          className="nav-bar__tools__cart__items-container__items__item__info__name truncate"
           to={`/item/${item._id}`}
+          title={item.name}
           onClick={() => {
             setIfHide(true);
             setBlackBox(false);
@@ -41,7 +41,7 @@ function CartItem({ item, setCart, setIfHide, setBlackBox, colors }) {
             }, 300);
           }}
         >
-          {truncate(item.name, 20)}
+          {item.name}
         </Link>
         <p className="nav-bar__tools__cart__items-container__items__item__info__price">
           {`$${((item.price * item.quantity) / 100).toFixed(2)}`}
