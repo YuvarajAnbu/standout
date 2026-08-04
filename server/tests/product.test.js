@@ -14,6 +14,21 @@ test("catalog category filters retain the shared category", () => {
   });
 });
 
+test("catalog search ignores unmatched dimensions from the frontend", () => {
+  assert.deepEqual(
+    helpers.categoryMatch("__no_catalog_match__", "tops"),
+    { type: { $in: ["tops"] } },
+  );
+  assert.deepEqual(
+    helpers.categoryMatch("women", "__no_catalog_match__"),
+    { catagory: { $in: ["women", "both"] } },
+  );
+  assert.deepEqual(
+    helpers.categoryMatch("__no_catalog_match__", "__no_catalog_match__"),
+    {},
+  );
+});
+
 test("stock filters require an available selected variant", () => {
   assert.deepEqual(helpers.stockMatch({ color: "ffffff", size: "m" }), {
     stock: {

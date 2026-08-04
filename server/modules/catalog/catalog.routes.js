@@ -18,7 +18,7 @@ const {
 } = require("#infrastructure/media/cloudinary");
 
 const router = express.Router();
-const NO_MATCH = ";0.hjgbhj";
+const NO_MATCH = "__no_catalog_match__";
 const listProjection = {
   _id: 1,
   name: 1,

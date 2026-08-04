@@ -55,4 +55,19 @@ describe("Search", () => {
     expect(fetch).toHaveBeenCalledTimes(1);
     expect(fetch.mock.calls[0][0]).toContain("/product/women/tops?");
   });
+
+  it("uses the shared no-match marker when only a product type matches", async () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={["/search?q=tops"]}>
+          <Search />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    expect(await screen.findByText("Search result shirt")).toBeInTheDocument();
+    expect(fetch.mock.calls[0][0]).toContain(
+      "/product/__no_catalog_match__/tops?",
+    );
+  });
 });
