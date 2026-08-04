@@ -70,4 +70,22 @@ describe("Search", () => {
       "/product/__no_catalog_match__/tops?",
     );
   });
+
+  it("labels recommendations as no results when no search terms match", async () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={["/search?q=sdasdasd"]}>
+          <Search />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    expect(
+      await screen.findByRole("heading", {
+        name: `We couldn't find anything for "sdasdasd"`,
+      }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("recommended for you")).toBeInTheDocument();
+    expect(fetch.mock.calls[0][0]).toContain("/product/best-seller?");
+  });
 });

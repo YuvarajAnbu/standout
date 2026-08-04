@@ -1,9 +1,4 @@
-import React, {
-  useEffect,
-  useState,
-  useCallback,
-  useMemo,
-} from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Filter from "@/features/catalog/components/filter/Filter";
@@ -124,7 +119,7 @@ function Search() {
                       .toLowerCase()
                       .replace(
                         /[`~!@#$%^&*()_|+\-=?;:'",.{}[\]()/\\]/gi,
-                        ""
+                        "",
                       ) === pluralize.plural(el).toLowerCase()
                   ) {
                     types.push(k.toLowerCase());
@@ -151,26 +146,28 @@ function Search() {
   //reset when search changes
 
   const reset = useCallback(() => {
-      setHideFilter({
-        sort: true,
-        color: true,
-        size: true,
-      });
-      setFilter({
-        sort: "",
-        color: [],
-        size: [],
-      });
-      setLastClicked("");
-      setNoResults(false);
+    setHideFilter({
+      sort: true,
+      color: true,
+      size: true,
+    });
+    setFilter({
+      sort: "",
+      color: [],
+      size: [],
+    });
+    setLastClicked("");
+    setNoResults(false);
   }, []);
 
   useEffect(reset, [search, reset]);
 
-  const catalogPath =
-    noResults || (catagory.includes(NO_MATCH) && type.includes(NO_MATCH))
-      ? "best-seller"
-      : `${catagory}/${type}`;
+  const queryHasNoMatches =
+    catagory.includes(NO_MATCH) && type.includes(NO_MATCH);
+  const showingRecommendations = noResults || queryHasNoMatches;
+  const catalogPath = showingRecommendations
+    ? "best-seller"
+    : `${catagory}/${type}`;
   const productsQuery = useInfiniteQuery({
     queryKey: queryKeys.products({
       search,
@@ -194,7 +191,8 @@ function Search() {
     },
   });
   const serverProducts = useMemo(
-    () => productsQuery.data?.pages.flatMap((pageData) => pageData.products) || [],
+    () =>
+      productsQuery.data?.pages.flatMap((pageData) => pageData.products) || [],
     [productsQuery.data],
   );
   const items = serverProducts;
@@ -213,7 +211,6 @@ function Search() {
       setNoResults(true);
     }
   }, [filter, firstPage]);
-
 
   const limitArr = () => {
     let arr = [];
@@ -238,36 +235,43 @@ function Search() {
           setBlackBox,
           setLastClicked,
         }}
+        noResults={showingRecommendations}
       />
       <div className="shop__items-container">
         <div
           className="shop__items-container__title"
-          style={noResults ? { borderBottom: "none" } : {}}
+          style={showingRecommendations ? { borderBottom: "none" } : {}}
         >
           <h1
             className={
-              noResults ? "shop__items-container__title__no-result" : ""
+              showingRecommendations
+                ? "shop__items-container__title__no-result"
+                : ""
             }
           >
             <span>
-              {noResults ? "We couldn't find anything for" : "Results For"}
+              {showingRecommendations
+                ? "We couldn't find anything for"
+                : "Results For"}
             </span>{" "}
             "{search}"
           </h1>
-          <p
-            role="button"
-            tabIndex={0}
-            aria-expanded={showFilters}
-            onClick={toggleMobileFilters}
-            onKeyDown={(event) =>
-              handleKeyboardActivation(event, toggleMobileFilters)
-            }
-          >
-            filter
-            <FontAwesomeIcon className="icon" icon="chevron-right" />
-          </p>
+          {!showingRecommendations && (
+            <p
+              role="button"
+              tabIndex={0}
+              aria-expanded={showFilters}
+              onClick={toggleMobileFilters}
+              onKeyDown={(event) =>
+                handleKeyboardActivation(event, toggleMobileFilters)
+              }
+            >
+              filter
+              <FontAwesomeIcon className="icon" icon="chevron-right" />
+            </p>
+          )}
         </div>
-        {noResults && (
+        {showingRecommendations && (
           <p className="shop__items-container__no-result">
             recommended for you
           </p>
