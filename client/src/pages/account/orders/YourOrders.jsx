@@ -54,10 +54,6 @@ function YourOrders() {
   });
 
   useEffect(() => {
-    document.title = "Your Orders | Stand Out";
-  }, []);
-
-  useEffect(() => {
     setNotSignedIn(false);
     setNoOrders(false);
 
@@ -113,10 +109,12 @@ function YourOrders() {
 
   return loading ? (
     <div className="loader-container">
+      <title>Your Orders | Stand Out</title>
       <div className="loader"></div>
     </div>
   ) : (
     <div className="your-orders">
+      <title>Your Orders | Stand Out</title>
       <MessageBanner message={errorMsgs} type="error" visible={showMsgs} onDismiss={dismissMessages} />
       <MessageBanner message={successMsgs} type="success" visible={showMsgs} onDismiss={dismissMessages} />
       {NotSignedIn && (

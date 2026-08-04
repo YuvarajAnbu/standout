@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "@/pages/auth/SignUpAndSignIn.scss";
 import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -33,10 +33,6 @@ function SignUp() {
 
   const [failed, setFailed] = useState("");
 
-  useEffect(() => {
-    document.title = "Sign Up | Stand Out";
-  }, []);
-
   const onSubmit = async (data) => {
     setLoading(true);
     setFailed("");
@@ -59,6 +55,7 @@ function SignUp() {
 
   return (
     <div className="user-form">
+      <title>Sign Up | Stand Out</title>
       <img src="/images/shopping.jpg" alt="shopping" width="548" height="642" decoding="async" />
       <div className="user-form__content">
         <div className="user-form__content__title">

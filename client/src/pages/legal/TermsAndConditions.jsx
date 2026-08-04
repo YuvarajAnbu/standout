@@ -1,13 +1,9 @@
-import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 
 function TermsAndConditions() {
-  useEffect(() => {
-    document.title = "Terms And Conditions | Stand Out";
-  }, []);
-
   return (
     <div className="footer__t-c">
+      <title>Terms And Conditions | Stand Out</title>
       <h1>Terms and Conditions</h1>
 
       <h2>Welcome to stand out!</h2>

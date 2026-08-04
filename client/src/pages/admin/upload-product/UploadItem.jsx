@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import "@/pages/admin/upload-product/UploadItem.scss";
@@ -30,10 +30,6 @@ export default function UploadItem() {
     setErrorMsgs,
     dismissMessages,
   } = useTimedMessages();
-
-  useEffect(() => {
-    document.title = "Upload Item | Stand Out";
-  }, []);
 
   const {
     register,
@@ -84,6 +80,7 @@ export default function UploadItem() {
 
   return (
     <div className="upload">
+      <title>Upload Item | Stand Out</title>
       <MessageBanner message={errorMsgs} type="error" visible={showMsgs} onDismiss={dismissMessages} />
       <MessageBanner message={successMsgs} type="success" visible={showMsgs} onDismiss={dismissMessages} />
       <h1>upload products</h1>

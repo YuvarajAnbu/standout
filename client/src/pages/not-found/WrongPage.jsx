@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "@/pages/not-found/WrongPage.scss";
 
@@ -6,12 +6,9 @@ function WrongPage() {
   const [inputValue, setInputvalue] = useState("");
   const navigate = useNavigate();
 
-  useEffect(() => {
-    document.title = "404 - Page Not Found";
-  }, []);
-
   return (
     <div className="wrong-page">
+      <title>404 - Page Not Found</title>
       <h1>404</h1>
       <p>
         The page you are looking for is not available. Try searching something

@@ -1,12 +1,7 @@
-import React, { useEffect } from "react";
-
 function PrivatePolicy() {
-  useEffect(() => {
-    document.title = "Private Policy | Stand Out";
-  }, []);
-
   return (
     <div className="footer__t-c">
+      <title>Private Policy | Stand Out</title>
       <h1>Private Policy</h1>
 
       <p>Please read Privacy Policy</p>

@@ -70,12 +70,6 @@ function Search() {
   };
 
   useEffect(() => {
-    if (search !== "") {
-      document.title = `${search} | Stand Out`;
-    }
-  }, [search]);
-
-  useEffect(() => {
     if (isDesktop && showFilters) {
       setBlackBox(false);
       setShowFilters(false);
@@ -231,6 +225,7 @@ function Search() {
 
   return (
     <div className="shop">
+      <title>{search ? `${search} | Stand Out` : "Search | Stand Out"}</title>
       <Filter
         {...{
           filter,

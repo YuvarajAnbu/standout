@@ -58,10 +58,6 @@ function Shop({ title, link }) {
   };
 
   useEffect(() => {
-    document.title = `${title} | Stand Out`;
-  }, [title]);
-
-  useEffect(() => {
     if (isDesktop && showFilters) {
       setBlackBox(false);
       setShowFilters(false);
@@ -134,6 +130,7 @@ function Shop({ title, link }) {
 
   return (
     <div className="shop">
+      <title>{title} | Stand Out</title>
       <Filter
         {...{
           hide: noRes,

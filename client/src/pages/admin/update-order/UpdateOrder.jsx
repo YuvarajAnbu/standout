@@ -45,10 +45,6 @@ function UpdateOrder() {
   });
 
   useEffect(() => {
-    document.title = "Update Orders | Stand Out";
-  }, []);
-
-  useEffect(() => {
     if (orderQuery.data) {
       setOrder(orderQuery.data);
       setDelivered(orderQuery.data.delivered);
@@ -60,6 +56,7 @@ function UpdateOrder() {
 
   return (
     <div>
+      <title>Update Orders | Stand Out</title>
       {orderQuery.isFetching && (
         <div className="loader-container">
           <div className="loader"></div>

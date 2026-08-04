@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
@@ -32,10 +32,6 @@ function SignIn() {
 
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    document.title = "Sign In | Stand Out";
-  }, []);
-
   const onSubmit = async (data) => {
     setLoading(true);
     setFailed(false);
@@ -54,6 +50,7 @@ function SignIn() {
 
   return (
     <div className="user-form signin">
+      <title>Sign In | Stand Out</title>
       <img src="/images/shopping.jpg" alt="shopping" width="548" height="642" decoding="async" />
       <div className="user-form__content">
         <div className="user-form__content__title">

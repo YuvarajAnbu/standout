@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAppStore } from "@/app/store/useAppStore";
@@ -49,10 +49,6 @@ function PersonalInfo() {
   const [loadingPassword, setLoadingPassword] = useState(false);
 
   const [passwordError, setPasswordError] = useState("");
-
-  useEffect(() => {
-    document.title = "My Account | Stand Out";
-  }, []);
 
   const {
     register,
@@ -117,6 +113,7 @@ function PersonalInfo() {
 
   return typeof user.name === "undefined" ? (
     <div className="personal-info__tool-tip-container">
+      <title>My Account | Stand Out</title>
       <div className="personal-info__tool-tip-container__tool-tip">
         <p>please signin to continue</p>
         <button type="button" onClick={() => navigate("/signin")}>ok</button>
@@ -131,6 +128,7 @@ function PersonalInfo() {
     </div>
   ) : (
     <div className="personal-info">
+      <title>My Account | Stand Out</title>
       <MessageBanner message={errorMsgs} type="error" visible={showMsgs} onDismiss={dismissMessages} />
       <MessageBanner message={successMsgs} type="success" visible={showMsgs} onDismiss={dismissMessages} />
       <h1>Personal info</h1>

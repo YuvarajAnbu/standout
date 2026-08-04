@@ -49,10 +49,6 @@ function Checkout() {
   }, [cart, payWithPaypal, subTotal]);
 
   useEffect(() => {
-    document.title = "My Shopping Cart | Stand Out";
-  }, []);
-
-  useEffect(() => {
     let active = true;
     loadScripts([
         "https://js.braintreegateway.com/web/3.92.1/js/client.min.js",
@@ -167,6 +163,7 @@ function Checkout() {
 
   return cart.length < 1 ? (
     <div className="checkout__tool-tip-container">
+      <title>My Shopping Cart | Stand Out</title>
       <div className="checkout__tool-tip-container__tool-tip">
         <p>
           No items in your cart. Go back to home page and add some items to
@@ -180,6 +177,7 @@ function Checkout() {
     </div>
   ) : (
     <div className="checkout">
+      <title>My Shopping Cart | Stand Out</title>
       {loading && (
         <div className="checkout__loader-container">
           <div className="checkout__loader-container__loader"></div>

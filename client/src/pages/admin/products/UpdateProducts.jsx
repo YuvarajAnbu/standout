@@ -88,10 +88,6 @@ function UpdateProducts() {
   };
 
   useEffect(() => {
-    document.title = "Update Products | Stand Out";
-  }, []);
-
-  useEffect(() => {
     if (isDesktop && showFilters) {
       setBlackBox(false);
       setShowFilters(false);
@@ -270,6 +266,7 @@ function UpdateProducts() {
 
   return (
     <div className="shop">
+      <title>Update Products | Stand Out</title>
       <MessageBanner message={errorMsgs} type="error" visible={showMsgs} onDismiss={dismissMessages} />
       <MessageBanner message={successMsgs} type="success" visible={showMsgs} onDismiss={dismissMessages} />
       <Filter

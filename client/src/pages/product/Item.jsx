@@ -51,12 +51,6 @@ function Item() {
     );
 
   useEffect(() => {
-    if (typeof item._id !== "undefined") {
-      document.title = `${toTitleCase(item.name)} | Stand Out`;
-    }
-  }, [item]);
-
-  useEffect(() => {
     if (addedToCart) {
       const a = setTimeout(() => {
         setAddedToCart(false);
@@ -142,6 +136,11 @@ function Item() {
 
   return (
     <div className="item-page">
+      <title>
+        {item?.name
+          ? `${toTitleCase(item.name)} | Stand Out`
+          : "Product | Stand Out"}
+      </title>
       <div
         className={
           addedToCart

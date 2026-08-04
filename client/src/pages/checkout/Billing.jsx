@@ -33,10 +33,6 @@ function Billing() {
   const [orderId, setOrderId] = useState("");
 
   useEffect(() => {
-    document.title = "Checkout | Stand Out";
-  }, []);
-
-  useEffect(() => {
     if (typeof user.name !== "undefined") {
       setHidden((prev) => {
         return {
@@ -68,6 +64,7 @@ function Billing() {
 
   return cart.length < 1 ? (
     <div className="billing__tool-tip-container">
+      <title>Checkout | Stand Out</title>
       <div className="billing__tool-tip-container__tool-tip">
         <p>
           No items in your cart. Go back to home page and add some items to
@@ -81,6 +78,7 @@ function Billing() {
     </div>
   ) : (
     <div className="billing">
+      <title>Checkout | Stand Out</title>
       {paymentSuccess && (
         <div className="billing__tool-tip-container">
           <div className="billing__tool-tip-container__tool-tip">

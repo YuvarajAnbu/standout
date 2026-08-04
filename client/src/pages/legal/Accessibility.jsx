@@ -1,12 +1,7 @@
-import React, { useEffect } from "react";
-
 function Accessibility() {
-  useEffect(() => {
-    document.title = "Accessibility | Stand Out";
-  }, []);
-
   return (
     <div className="footer__t-c">
+      <title>Accessibility | Stand Out</title>
       <h1>Our Commitment to Accessibility</h1>
 
       <p>

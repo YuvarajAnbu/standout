@@ -46,10 +46,6 @@ export default function EditProduct() {
   const { fields, append, remove } = useFieldArray({ control, name: "stock" });
 
   useEffect(() => {
-    document.title = "Edit Products | Stand Out";
-  }, []);
-
-  useEffect(() => {
     if (productQuery.isError) {
       navigate("/404", { replace: true });
     }
@@ -106,6 +102,7 @@ export default function EditProduct() {
   if (!item) {
     return (
       <div className="loader-container">
+        <title>Edit Products | Stand Out</title>
         <div className="loader" />
       </div>
     );
@@ -113,6 +110,7 @@ export default function EditProduct() {
 
   return (
     <div className="upload">
+      <title>Edit Products | Stand Out</title>
       <MessageBanner message={errorMsgs} type="error" visible={showMsgs} onDismiss={dismissMessages} />
       <MessageBanner message={successMsgs} type="success" visible={showMsgs} onDismiss={dismissMessages} />
       <h1>edit products</h1>
