@@ -36,54 +36,51 @@ function Color({
         <p className="shop__filters-container__filter-container__filter__name">
           colour
         </p>
-        {hideFilter.color ? (
-          <p className="shop__filters-container__filter-container__filter__icon">
-            +
-          </p>
-        ) : (
-          <p className="shop__filters-container__filter-container__filter__icon">
-            -
-          </p>
-        )}
+        <span
+          className="shop__filters-container__filter-container__filter__icon"
+          aria-hidden="true"
+        />
       </div>
       <div
         className={
           hideFilter.color
-            ? "shop__filters-container__filter-container__options--color shop__filters-container__filter-container__options--hidden"
-            : "shop__filters-container__filter-container__options--color"
+            ? "shop__filters-container__filter-container__options shop__filters-container__filter-container__options--hidden"
+            : "shop__filters-container__filter-container__options"
         }
       >
-        {itemStock.colors.map((color, index) => (
-          <div
-            key={index}
-            className={
-              filter.color.includes(color.slice(1))
-                ? "shop__filters-container__filter-container__options--color__color-container shop__filters-container__filter-container__options--color__color-container--active"
-                : "shop__filters-container__filter-container__options--color__color-container"
-            }
-            role="checkbox"
-            tabIndex={0}
-            aria-checked={filter.color.includes(color.slice(1))}
-            onClick={() => toggleColor(color)}
-            onKeyDown={(event) =>
-              handleKeyboardActivation(event, () => toggleColor(color))
-            }
-          >
+        <div className="shop__filters-container__filter-container__options--color">
+          {itemStock.colors.map((color, index) => (
             <div
+              key={index}
               className={
                 filter.color.includes(color.slice(1))
-                  ? "shop__filters-container__filter-container__options--color__color-container__color-box shop__filters-container__filter-container__options--color__color-container__color-box--active"
-                  : "shop__filters-container__filter-container__options--color__color-container__color-box"
+                  ? "shop__filters-container__filter-container__options--color__color-container shop__filters-container__filter-container__options--color__color-container--active"
+                  : "shop__filters-container__filter-container__options--color__color-container"
+              }
+              role="checkbox"
+              tabIndex={0}
+              aria-checked={filter.color.includes(color.slice(1))}
+              onClick={() => toggleColor(color)}
+              onKeyDown={(event) =>
+                handleKeyboardActivation(event, () => toggleColor(color))
               }
             >
               <div
-                className="shop__filters-container__filter-container__options--color__color-container__color-box__color"
-                style={{ backgroundColor: color }}
-              ></div>
+                className={
+                  filter.color.includes(color.slice(1))
+                    ? "shop__filters-container__filter-container__options--color__color-container__color-box shop__filters-container__filter-container__options--color__color-container__color-box--active"
+                    : "shop__filters-container__filter-container__options--color__color-container__color-box"
+                }
+              >
+                <div
+                  className="shop__filters-container__filter-container__options--color__color-container__color-box__color"
+                  style={{ backgroundColor: color }}
+                ></div>
+              </div>
+              <p>{getColorName(colors, color)}</p>
             </div>
-            <p>{getColorName(colors, color)}</p>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );

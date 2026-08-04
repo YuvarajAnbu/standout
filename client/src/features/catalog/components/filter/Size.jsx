@@ -34,42 +34,39 @@ function Size({
         <p className="shop__filters-container__filter-container__filter__name">
           size
         </p>
-        {hideFilter.size ? (
-          <p className="shop__filters-container__filter-container__filter__icon">
-            +
-          </p>
-        ) : (
-          <p className="shop__filters-container__filter-container__filter__icon">
-            -
-          </p>
-        )}
+        <span
+          className="shop__filters-container__filter-container__filter__icon"
+          aria-hidden="true"
+        />
       </div>
       <div
         className={
           hideFilter.size
-            ? "shop__filters-container__filter-container__options--size shop__filters-container__filter-container__options--hidden"
-            : "shop__filters-container__filter-container__options--size"
+            ? "shop__filters-container__filter-container__options shop__filters-container__filter-container__options--hidden"
+            : "shop__filters-container__filter-container__options"
         }
       >
-        {itemStock.sizes.map((size, index) => (
-          <div
-            key={index}
-            className={
-              filter.size.includes(size)
-                ? "shop__filters-container__filter-container__options--size__size shop__filters-container__filter-container__options--size__size--active"
-                : "shop__filters-container__filter-container__options--size__size"
-            }
-            role="checkbox"
-            tabIndex={0}
-            aria-checked={filter.size.includes(size)}
-            onClick={() => toggleSize(size)}
-            onKeyDown={(event) =>
-              handleKeyboardActivation(event, () => toggleSize(size))
-            }
-          >
-            <p>{size}</p>
-          </div>
-        ))}
+        <div className="shop__filters-container__filter-container__options--size">
+          {itemStock.sizes.map((size, index) => (
+            <div
+              key={index}
+              className={
+                filter.size.includes(size)
+                  ? "shop__filters-container__filter-container__options--size__size shop__filters-container__filter-container__options--size__size--active"
+                  : "shop__filters-container__filter-container__options--size__size"
+              }
+              role="checkbox"
+              tabIndex={0}
+              aria-checked={filter.size.includes(size)}
+              onClick={() => toggleSize(size)}
+              onKeyDown={(event) =>
+                handleKeyboardActivation(event, () => toggleSize(size))
+              }
+            >
+              <p>{size}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
