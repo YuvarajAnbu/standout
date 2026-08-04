@@ -168,6 +168,9 @@
         > * {
           min-height: 0;
           overflow: hidden;
+          transition:
+            padding-top 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+            padding-bottom 0.28s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         &--checkbox {
@@ -266,6 +269,11 @@
             grid-template-rows 0.28s cubic-bezier(0.4, 0, 1, 1),
             opacity 0.18s ease,
             visibility 0s linear 0.28s;
+
+          > * {
+            padding-top: 0;
+            padding-bottom: 0;
+          }
         }
       }
     }
@@ -632,7 +640,8 @@
 @media (prefers-reduced-motion: reduce) {
   .shop__filters-container__filter-container {
     &__filter__icon::after,
-    &__options {
+    &__options,
+    &__options > * {
       transition-duration: 0.01ms;
     }
   }
