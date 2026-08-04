@@ -51,9 +51,9 @@ function Checkout() {
   useEffect(() => {
     let active = true;
     loadScripts([
-        "https://js.braintreegateway.com/web/3.92.1/js/client.min.js",
-        "https://js.braintreegateway.com/web/3.92.1/js/paypal-checkout.min.js",
-      ])
+      "https://js.braintreegateway.com/web/3.92.1/js/client.min.js",
+      "https://js.braintreegateway.com/web/3.92.1/js/paypal-checkout.min.js",
+    ])
       .then(() => active && setScriptLoaded(true))
       .catch(() => active && setPaymentFailed(true));
 
@@ -71,10 +71,10 @@ function Checkout() {
 
     cachedGet("/payment/client_token", { staleTime: 10 * 60_000 })
       .then((token) =>
-        window.braintree.client.create({ authorization: token.data })
+        window.braintree.client.create({ authorization: token.data }),
       )
       .then((clientInstance) =>
-        window.braintree.paypalCheckout.create({ client: clientInstance })
+        window.braintree.paypalCheckout.create({ client: clientInstance }),
       )
       .then((instance) => {
         paypalCheckoutInstance = instance;
@@ -83,63 +83,65 @@ function Checkout() {
       .then((instance) => {
         if (!active) return undefined;
         paypalButtons = window.paypal.Buttons({
-                  fundingSource: window.paypal.FUNDING.PAYPAL,
-                  createOrder: () => {
-                    const { subTotal: currentSubtotal } = checkoutStateRef.current;
-                    return instance.createPayment({
-                      flow: "checkout",
-                      amount: (
-                        Number(currentSubtotal / 100) +
-                        Number((currentSubtotal * 2) / 10000)
-                      ).toFixed(2),
-                      currency: "USD",
-                      intent: "capture",
-                      enableShippingAddress: true,
-                    });
-                  },
+          fundingSource: window.paypal.FUNDING.PAYPAL,
+          createOrder: () => {
+            const { subTotal: currentSubtotal } = checkoutStateRef.current;
+            return instance.createPayment({
+              flow: "checkout",
+              amount: (
+                Number(currentSubtotal / 100) +
+                Number((currentSubtotal * 2) / 10000)
+              ).toFixed(2),
+              currency: "USD",
+              intent: "capture",
+              enableShippingAddress: true,
+            });
+          },
 
-                  onApprove: (data) => {
-                    return instance
-                      .tokenizePayment(data)
-                      .then((payload) => {
-                        const currentCart = checkoutStateRef.current.cart;
-                        const opt = {
-                          payload,
-                          cart: currentCart,
-                        };
-                        setLoading(true);
-                        return payWithPaypalRef.current(opt)
-                          .then((res) => {
-                            setLoading(false);
-                            setPaymentSuccess(true);
-                            const order = res.order;
-                            setOrders((prev) => {
-                              const localOrderId = order?._id ?? prev.length + 1;
-                              setOrderId(localOrderId);
-                              return [...prev, {
-                                ...order,
-                                _id: localOrderId,
-                                items: currentCart,
-                                delivered: false,
-                                date: new Date().toISOString(),
-                              }];
-                            });
-                          })
-                          .catch(() => {
-                            setLoading(false);
-                            setPaymentFailed(true);
-                          });
-                      });
-                  },
-
-                  onCancel: () => setLoading(false),
-
-                  onError: function (err) {
-                    console.error("PayPal error", err);
-                    setLoading(false);
-                    setPaymentFailed(true);
-                  },
+          onApprove: (data) => {
+            return instance.tokenizePayment(data).then((payload) => {
+              const currentCart = checkoutStateRef.current.cart;
+              const opt = {
+                payload,
+                cart: currentCart,
+              };
+              setLoading(true);
+              return payWithPaypalRef
+                .current(opt)
+                .then((res) => {
+                  setLoading(false);
+                  setPaymentSuccess(true);
+                  const order = res.order;
+                  setOrders((prev) => {
+                    const localOrderId = order?._id ?? prev.length + 1;
+                    setOrderId(localOrderId);
+                    return [
+                      ...prev,
+                      {
+                        ...order,
+                        _id: localOrderId,
+                        items: currentCart,
+                        delivered: false,
+                        date: new Date().toISOString(),
+                      },
+                    ];
+                  });
+                })
+                .catch(() => {
+                  setLoading(false);
+                  setPaymentFailed(true);
                 });
+            });
+          },
+
+          onCancel: () => setLoading(false),
+
+          onError: function (err) {
+            console.error("PayPal error", err);
+            setLoading(false);
+            setPaymentFailed(true);
+          },
+        });
         return paypalButtons.render("#paypal-button");
       })
       .then(() => active && setPaypalLoading(false))
@@ -169,7 +171,9 @@ function Checkout() {
           No items in your cart. Go back to home page and add some items to
           purchase.
         </p>
-        <button type="button" onClick={() => navigate("/")}>ok</button>
+        <button type="button" onClick={() => navigate("/")}>
+          ok
+        </button>
       </div>
       <Link to="/">
         <div className="checkout__tool-tip-container__black-box"></div>
@@ -196,7 +200,9 @@ function Checkout() {
               type="button"
               onClick={() => {
                 setCart([]);
-                navigate(typeof user.name !== "undefined" ? "/your-orders" : "/");
+                navigate(
+                  typeof user.name !== "undefined" ? "/your-orders" : "/",
+                );
               }}
             >
               ok
@@ -241,7 +247,10 @@ function Checkout() {
         </div>
         <div className="checkout__items-container__items">
           {cart.map((el, index) => (
-            <div className="checkout__items-container__items__item" key={`${el._id}-${el.color}-${el.size}`}>
+            <div
+              className="checkout__items-container__items__item"
+              key={`${el._id}-${el.color}-${el.size}`}
+            >
               <div className="checkout__items-container__items__item__content">
                 <div className="checkout__items-container__items__item__content__img">
                   <Link to={`/item/${el._id}`}>
@@ -271,7 +280,7 @@ function Checkout() {
                             return prev.map((item, itemIndex) =>
                               itemIndex === index
                                 ? { ...item, quantity: Number(value) }
-                                : item
+                                : item,
                             );
                           });
                         }}

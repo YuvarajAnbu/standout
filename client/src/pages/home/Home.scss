@@ -82,6 +82,7 @@
         a {
           color: #424242;
           text-transform: capitalize;
+          text-decoration: none;
         }
 
         .link {
@@ -93,6 +94,11 @@
             }
           }
         }
+
+        .name {
+          margin-top: 10px;
+        }
+
         .price {
           font-weight: 500;
         }

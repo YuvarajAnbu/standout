@@ -118,9 +118,11 @@ function ProductCarousel({
             >
               {items.map((el, index) => (
                 <SwiperSlide key={el._id}>
-                  <div className={`home__${collection}__items-container__item`}>
-                    <div className="image-container">
-                      <Link to={`/item/${el._id}`}>
+                  <Link to={`/item/${el._id}`}>
+                    <div
+                      className={`home__${collection}__items-container__item`}
+                    >
+                      <div className="image-container">
                         <img
                           src={imgPrefix(200) + el.stock[0].images[0]}
                           alt={el.name}
@@ -139,37 +141,35 @@ function ProductCarousel({
                             e.target.src = "/images/imgFailed.jpg";
                           }}
                         />
-                      </Link>
-                    </div>
-                    <Link to={`/item/${el._id}`}>
+                      </div>
                       <p className="name truncate" title={el.name}>
                         {el.name}
                       </p>
-                    </Link>
-                    <p
-                      className={
-                        showRatings && el.totalRatings >= 1
-                          ? "price"
-                          : "price margin"
-                      }
-                    >
-                      $ {(el.price / 100).toFixed(2)}
-                    </p>
-                    {showRatings && el.totalRatings >= 1 && (
-                      <div className="rating-container">
-                        <RatingStars
-                          rating={el.averageRating}
-                          className="rating-container__icons"
-                        />
-                        <p className="rating-container__rating">
-                          {el.averageRating.toFixed(1)}
-                        </p>
-                        <p className="rating-container__people">
-                          {`(${el.totalRatings})`}
-                        </p>
-                      </div>
-                    )}
-                  </div>
+                      <p
+                        className={
+                          showRatings && el.totalRatings >= 1
+                            ? "price"
+                            : "price margin"
+                        }
+                      >
+                        $ {(el.price / 100).toFixed(2)}
+                      </p>
+                      {showRatings && el.totalRatings >= 1 && (
+                        <div className="rating-container">
+                          <RatingStars
+                            rating={el.averageRating}
+                            className="rating-container__icons"
+                          />
+                          <p className="rating-container__rating">
+                            {el.averageRating.toFixed(1)}
+                          </p>
+                          <p className="rating-container__people">
+                            {`(${el.totalRatings})`}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </Link>
                 </SwiperSlide>
               ))}
               <SwiperSlide>

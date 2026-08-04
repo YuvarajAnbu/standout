@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import "@/app/layout/header/Header.scss";
 import NavLinks from "@/app/layout/header/components/navLinks/NavLinks";
 import Tools from "@/app/layout/header/components/tools/Tools";
@@ -27,8 +27,8 @@ function Header() {
 
       <div className="advertisement">
         <p>
-          <span>Hurry up!</span> 40% off every product this month. Don't
-          miss the deal
+          <span>Hurry up!</span> 40% off every product this month. Don't miss
+          the deal
         </p>
       </div>
 
@@ -37,9 +37,7 @@ function Header() {
           <p>
             You are viewing this website from the owner's perspective. You can
             upload and edit products and update orders.{" "}
-            <span>
-              (Note: demo changes are not saved to the database.)
-            </span>
+            <span>(Note: demo changes are not saved to the database.)</span>
           </p>
           <Link to="/upload">Upload Products</Link>
           <Link to="/update-products">Update Products</Link>

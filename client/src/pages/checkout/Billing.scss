@@ -195,7 +195,7 @@
             }
           }
 
-          button {
+          button[type="submit"] {
             background-color: black;
             color: white;
             padding: 10px 20px;
@@ -211,7 +211,7 @@
             &:disabled,
             &:hover,
             &:focus {
-              background-color: rgba(0, 0, 0, 0.712);
+              transform: scale(1.02);
             }
           }
 
@@ -232,7 +232,8 @@
               height: 15px;
               border: double 1px transparent;
               border-radius: 80px;
-              background-image: linear-gradient(white, white),
+              background-image:
+                linear-gradient(white, white),
                 radial-gradient(
                   circle at top,
                   rgb(94, 94, 94) 30%,
