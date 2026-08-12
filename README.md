@@ -1,68 +1,68 @@
- # Standout
-An online clothing store, where you can BUY, ADD, EDIT, and DELETE products.
-You'll be welcomed to the website as an owner of the site and you have full access and customization of it.
-you can't do any changes on the database cuz i don't want people to mess it up. i used local storage instead of database to track product changes and orders. <br>
+# Standout
 
+Standout is a MERN clothing storefront with product browsing, search, carts,
+orders, customer accounts, admin order management, and Braintree payments.
 
-📃 Its a MERN stack and i used
-- HTML
-- SCSS
-- REACT JS
-- NODE JS
-- MONGODB
-- [Cloudinary](https://cloudinary.com) for storing images
-- [Braintree](https://www.braintreepayments.com) for payment gateway
-- Libraries
-  - [React hook form](https://react-hook-form.com)
-  - [React router dom](https://reactrouter.com)
-  - [Axios](https://www.npmjs.com/package/axios)
-  - [Swiper js](https://swiperjs.com)
-  - [Express js](https://expressjs.com)
-  - [Mongoose js](https://mongoosejs.com)
-  - [Bcrypt js](https://www.npmjs.com/package/bcrypt)
-  - [Json Web Token](https://www.npmjs.com/package/jsonwebtoken)
-  
+## Requirements
 
-## How to run it
-you need two tabs on cli
+- Node.js 22.12 or newer
+- MongoDB
+- Braintree sandbox credentials
+- Cloudinary credentials for product image management
 
-create a .env file and add these variables. (Use your own keys Instead of asterisk)
+Copy `.env.example` to `.env` and replace every placeholder with your own value.
+Never commit `.env`.
 
-   - MONGODB_URI=******
-   - JWT_SECRET=******
-   - CLOUDINARY_CLOUD_NAME=******
-   - CLOUDINARY_API_KEY=******
-   - CLOUDINARY_API_SECRET=******
-   - SANDBOX_MERCHANT_ID=******
-   - SANDBOX_PUBLIC_KEY=******
-   - SANDBOX_PRIVATE_KEY=******
+## Development
 
+Install and start the API:
 
-### Backend
-
-##### Development
-```
-npm i
+```bash
+npm install
 npm run dev
 ```
 
-##### Production
-```
-npm run Start
-```
+In a second terminal, install and start the client:
 
-### Frontend
-
-##### Development
-```
+```bash
 cd client
-npm i
+npm install
 npm start
 ```
 
-##### Production
-```
+The API listens on port 3001 and Vite serves the client on port 3000.
+
+## Verification
+
+```bash
+npm run check:server
+npm run test:server
+npm audit --omit=dev
+
 cd client
-npm i
+npm run lint
+npm test
 npm run build
+npm audit --omit=dev
 ```
+
+## Production
+
+Build the client before starting the Express server:
+
+```bash
+cd client
+npm ci
+npm run build
+cd ..
+npm ci
+npm start
+```
+
+Set `NODE_ENV=production`. Express serves the generated `client/dist` directory
+and falls back to `index.html` for client-side routes.
+
+Set `BRAINTREE_ENVIRONMENT=production` and use the `BRAINTREE_MERCHANT_ID`,
+`BRAINTREE_PUBLIC_KEY`, and `BRAINTREE_PRIVATE_KEY` variables for live payments.
+For `mongodb+srv` connections, `MONGODB_DNS_SERVERS` accepts comma-separated DNS
+servers; set it to `system` when the host resolver already supports SRV records.

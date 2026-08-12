@@ -9,7 +9,11 @@
 /coverage
 
 # production
-# /build
+/build
+/dist
+
+# vite
+.vite
 
 # misc
 .DS_Store
