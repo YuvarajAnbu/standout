@@ -162,9 +162,7 @@ function Search() {
 
   useEffect(reset, [search, reset]);
 
-  const queryHasNoMatches =
-    catagory.includes(NO_MATCH) && type.includes(NO_MATCH);
-  const showingRecommendations = noResults || queryHasNoMatches;
+  const showingRecommendations = noResults;
   const catalogPath = showingRecommendations
     ? "best-seller"
     : `${catagory}/${type}`;
@@ -179,7 +177,16 @@ function Search() {
     enabled: catagory.length > 0 && type.length > 0,
     queryFn: ({ pageParam, signal }) =>
       apiRequest(
-        `/product/${catalogPath}?page=${pageParam}&limit=${limit}&sort=${filter.sort}&color=${filter.color}&size=${filter.size}&filter=${lastClicked}&includeFilters=${pageParam === 1}`,
+        `/product/${catalogPath}?${new URLSearchParams({
+          page: pageParam,
+          limit,
+          sort: filter.sort,
+          color: filter.color.join(","),
+          size: filter.size.join(","),
+          filter: lastClicked,
+          includeFilters: pageParam === 1,
+          ...(showingRecommendations ? {} : { q: search }),
+        })}`,
         { signal },
       ),
     getNextPageParam: (lastPage, pages) => {

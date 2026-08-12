@@ -105,7 +105,10 @@ function ShopItem({
             >
               delete
             </button>
-            <button type="button" onClick={() => navigate(`/edit-item/${el._id}`)}>
+            <button
+              type="button"
+              onClick={() => navigate(`/edit-item/${el._id}`)}
+            >
               edit
             </button>
           </div>
@@ -130,7 +133,7 @@ function ShopItem({
                       key={i}
                       icon="star"
                       className="shop__items-container__items__item__rating-container__icons__icon"
-                    />
+                    />,
                   );
                 }
                 return arr;

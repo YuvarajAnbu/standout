@@ -216,13 +216,29 @@
           }
 
           .payment-card-btn {
-            display: flex;
+            display: flex !important;
             justify-content: center;
             align-items: center;
             border: 1px solid black;
             position: relative;
             width: 141px;
             height: 36px;
+            background-color: black;
+            color: white;
+            padding: 10px 20px;
+            text-transform: uppercase;
+            margin-top: 10px;
+            margin-right: 0;
+            margin-left: auto;
+            cursor: pointer;
+
+            &:disabled,
+            &:hover,
+            &:focus {
+              transform: scale(1.02);
+              cursor: not-allowed;
+            }
+
             &--loading {
               background-color: white !important;
             }
@@ -254,14 +270,16 @@
             justify-content: space-between;
             align-items: center;
 
-            span {
+            &__button {
               color: #757575;
               text-decoration: underline;
               cursor: pointer;
               text-transform: capitalize;
-              font-size: 12px;
+              font-size: 14px;
               font-weight: 400;
               user-select: none;
+              border: none;
+              background-color: transparent;
             }
           }
 
@@ -269,10 +287,16 @@
             display: flex;
             align-items: center;
             margin: 20px 0;
+            border: none;
+            background-color: transparent;
+            cursor: pointer;
 
-            &__icons {
+            &__icon {
               margin-right: 7px;
-              cursor: pointer;
+              svg {
+                width: 16px;
+                height: 16px;
+              }
             }
 
             p {
@@ -295,6 +319,8 @@
           }
           &__edit {
             position: absolute;
+            border: none;
+            background-color: transparent;
             top: 10px;
             right: 35px;
             color: #555454;
@@ -332,8 +358,7 @@
             padding: 15px;
             margin: 7px;
             position: relative;
-
-            //   position: relative;
+            cursor: pointer;
 
             &__icon {
               width: 100%;
@@ -353,8 +378,6 @@
 
             input {
               opacity: 0;
-              width: 100%;
-              height: 100%;
               position: absolute;
               top: 0;
               left: 0;
@@ -367,6 +390,10 @@
             }
 
             &__desc {
+              strong {
+                font-weight: 600;
+              }
+              strong,
               p {
                 font-size: 13px;
                 text-transform: capitalize;
@@ -383,16 +410,16 @@
             display: flex;
             cursor: pointer;
             border: none;
+            background-color: transparent;
             padding: 0;
             min-width: 100px;
             max-width: 100px;
-            p {
-              text-transform: capitalize;
-              font-weight: 500;
-              color: rgb(95, 95, 95);
-              text-decoration: underline;
-              font-size: 13px;
-            }
+            font-weight: 500;
+            color: rgb(95, 95, 95);
+            text-decoration: underline;
+            font-size: 13px;
+            white-space: nowrap;
+            text-transform: capitalize;
           }
         }
       }

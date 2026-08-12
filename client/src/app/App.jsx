@@ -1,4 +1,4 @@
-import React, { useEffect, lazy, Suspense } from "react";
+import React, { useEffect, lazy, Suspense, useState } from "react";
 import "@/app/App.scss";
 import { BrowserRouter } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -69,14 +69,20 @@ library.add(
 function App() {
   const setUser = useAppStore((state) => state.setUser);
   const authQuery = useQuery(authQueryOptions());
+  const [authInitialized, setAuthInitialized] = useState(false);
 
   useEffect(() => {
     unlockPageScroll();
   }, []);
 
   useEffect(() => {
-    if (authQuery.data) setUser(authQuery.data.user || {});
-    if (authQuery.isError) setUser({});
+    if (authQuery.data) {
+      setUser(authQuery.data.user || {});
+      setAuthInitialized(true);
+    } else if (authQuery.isError) {
+      setUser({});
+      setAuthInitialized(true);
+    }
   }, [authQuery.data, authQuery.isError, setUser]);
 
   return (
@@ -90,7 +96,7 @@ function App() {
           }
         >
           <Header />
-          {authQuery.isPending ? (
+          {authQuery.isPending || !authInitialized ? (
             <div className="loader-container">
               <div className="loader"></div>
             </div>

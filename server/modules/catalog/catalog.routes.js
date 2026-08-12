@@ -78,6 +78,24 @@ function categoryMatch(catagory, type) {
   return match;
 }
 
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function searchMatch(catagory, type, query) {
+  const taxonomyMatch = categoryMatch(catagory, type);
+  const searchTerm = typeof query === "string" ? query.trim().slice(0, 200) : "";
+  const matches = [];
+
+  if (Object.keys(taxonomyMatch).length > 0) matches.push(taxonomyMatch);
+  if (searchTerm) {
+    matches.push({ name: { $regex: escapeRegExp(searchTerm), $options: "i" } });
+  }
+
+  if (matches.length === 1) return matches[0];
+  return matches.length > 1 ? { $or: matches } : {};
+}
+
 function exclusions(query) {
   const ids = validObjectIds(query.except);
   return ids.length ? { _id: { $nin: ids.map((id) => new mongoose.Types.ObjectId(id)) } } : {};
@@ -90,7 +108,13 @@ function sortFrom(query, fallback) {
   return fallback;
 }
 
-async function catalogResponse({ match, query, sort, projection = listProjection }) {
+async function catalogResponse({
+  match,
+  query,
+  sort,
+  projection = listProjection,
+  stages = [],
+}) {
   const { limit, skip } = pagination(query);
   const includeFilters = query.includeFilters !== "false";
   const facets = {
@@ -119,6 +143,7 @@ async function catalogResponse({ match, query, sort, projection = listProjection
 
   const [result] = await Product.aggregate([
     { $match: match },
+    ...stages,
     { $facet: facets },
   ]);
   let filters;
@@ -146,27 +171,36 @@ function currentMonth() {
   return Number(`${now.getUTCFullYear()}${now.getUTCMonth() + 1}`);
 }
 
-function trendingSelection(query, hasCurrentSales) {
-  if (!hasCurrentSales) {
-    return {
-      match: { sales: { $gte: 1 }, ...stockMatch(query) },
-      sort: sortFrom(query, { sales: -1, _id: 1 }),
-      projection: { ...listProjection, sales: 1 },
-    };
-  }
-
+function trendingSelection(query) {
   const month = currentMonth();
   return {
-    match: {
-      salesPerMonth: { $elemMatch: { month, sales: { $gte: 1 } } },
-      ...stockMatch(query),
-    },
-    sort: sortFrom(query, { "salesPerMonth.sales": -1, _id: 1 }),
+    match: { sales: { $gte: 1 }, ...stockMatch(query) },
+    stages: [{
+      $set: {
+        currentPeriodSales: {
+          $sum: {
+            $map: {
+              input: {
+                $filter: {
+                  input: { $ifNull: ["$salesPerMonth", []] },
+                  as: "entry",
+                  cond: { $eq: ["$$entry.month", month] },
+                },
+              },
+              as: "entry",
+              in: "$$entry.sales",
+            },
+          },
+        },
+      },
+    }],
+    sort: sortFrom(query, { currentPeriodSales: -1, sales: -1, _id: 1 }),
     projection: {
       ...listProjection,
+      sales: 1,
       salesPerMonth: {
         $filter: {
-          input: "$salesPerMonth",
+          input: { $ifNull: ["$salesPerMonth", []] },
           as: "entry",
           cond: { $eq: ["$$entry.month", month] },
         },
@@ -186,15 +220,7 @@ router.get("/best-seller", asyncHandler(async (req, res) => {
 }));
 
 router.get("/trending", asyncHandler(async (req, res) => {
-  const month = currentMonth();
-  const currentMatch = {
-    salesPerMonth: { $elemMatch: { month, sales: { $gte: 1 } } },
-    ...stockMatch(req.query),
-  };
-  const selection = trendingSelection(
-    req.query,
-    Boolean(await Product.exists(currentMatch)),
-  );
+  const selection = trendingSelection(req.query);
   res.json(await catalogResponse({ ...selection, query: req.query }));
 }));
 
@@ -345,15 +371,19 @@ router.delete("/:id/review", auth.requireAuth, asyncHandler(async (req, res) => 
 }));
 
 router.get("/:catagory/:type", asyncHandler(async (req, res) => {
-  const categories = categoryMatch(req.params.catagory, req.params.type);
-  if (Object.keys(categories).length === 0) {
+  const search = searchMatch(
+    req.params.catagory,
+    req.params.type,
+    req.query.q,
+  );
+  if (Object.keys(search).length === 0) {
     return res.json({
       products: [],
       count: 0,
       filters: { colors: [], sizes: [] },
     });
   }
-  const match = { ...categories, ...exclusions(req.query), ...stockMatch(req.query) };
+  const match = { ...search, ...exclusions(req.query), ...stockMatch(req.query) };
   return res.json(await catalogResponse({
     match,
     query: req.query,
@@ -377,6 +407,7 @@ module.exports.helpers = {
   categoryMatch,
   commaList,
   currentMonth,
+  searchMatch,
   stockMatch,
   trendingSelection,
 };

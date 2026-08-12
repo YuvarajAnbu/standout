@@ -10,6 +10,7 @@ import Order from "@/pages/account/orders/components/Order";
 import { useTimedMessages } from "@/shared/hooks/useTimedMessages";
 import MessageBanner from "@/shared/components/ui/MessageBanner";
 import { reportError } from "@/shared/utils/logger";
+import { mergeOrdersById } from "@/features/orders/utils/orders";
 
 function YourOrders() {
   const location = useLocation();
@@ -23,13 +24,8 @@ function YourOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoding] = useState(true);
 
-  const {
-    successMsgs,
-    errorMsgs,
-    showMsgs,
-    setSuccessMsgs,
-    dismissMessages,
-  } = useTimedMessages();
+  const { successMsgs, errorMsgs, showMsgs, setSuccessMsgs, dismissMessages } =
+    useTimedMessages();
 
   const [NotSignedIn, setNotSignedIn] = useState(false);
   const [noOrders, setNoOrders] = useState(false);
@@ -43,9 +39,12 @@ function YourOrders() {
   const guestOrderQuery = useQuery({
     queryKey: queryKeys.guestOrder(guestOrderId),
     queryFn: ({ signal }) =>
-      apiRequest(`/user/guest-order?orderId=${encodeURIComponent(guestOrderId)}`, {
-        signal,
-      }),
+      apiRequest(
+        `/user/guest-order?orderId=${encodeURIComponent(guestOrderId)}`,
+        {
+          signal,
+        },
+      ),
     enabled:
       !isCustomerOrdersRoute &&
       Boolean(guestOrderId) &&
@@ -63,10 +62,9 @@ function YourOrders() {
         setLoding(false);
       } else if (customerOrdersQuery.data) {
         const localOrders = userOrders
-          .filter((order) => order.customer.email === user.email)
-          .sort((a, b) => new Date(b.date) - new Date(a.date));
+          .filter((order) => order.customer?.email === user.email);
         setOrders(
-          [...localOrders, ...customerOrdersQuery.data].filter(
+          mergeOrdersById(localOrders, customerOrdersQuery.data).filter(
             (order) => !hideOrders.includes(order._id),
           ),
         );
@@ -115,13 +113,25 @@ function YourOrders() {
   ) : (
     <div className="your-orders">
       <title>Your Orders | Stand Out</title>
-      <MessageBanner message={errorMsgs} type="error" visible={showMsgs} onDismiss={dismissMessages} />
-      <MessageBanner message={successMsgs} type="success" visible={showMsgs} onDismiss={dismissMessages} />
+      <MessageBanner
+        message={errorMsgs}
+        type="error"
+        visible={showMsgs}
+        onDismiss={dismissMessages}
+      />
+      <MessageBanner
+        message={successMsgs}
+        type="success"
+        visible={showMsgs}
+        onDismiss={dismissMessages}
+      />
       {NotSignedIn && (
         <div className="your-orders__tool-tip-container">
           <div className="your-orders__tool-tip-container__tool-tip">
             <p>please signin to continue</p>
-            <button type="button" onClick={() => navigate("/signin")}>ok</button>
+            <button type="button" onClick={() => navigate("/signin")}>
+              ok
+            </button>
           </div>
           <div
             className="your-orders__tool-tip-container__black-box"

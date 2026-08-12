@@ -29,6 +29,22 @@ test("catalog search ignores unmatched dimensions from the frontend", () => {
   );
 });
 
+test("catalog search matches taxonomy or a safely escaped product name", () => {
+  const match = helpers.searchMatch("women", "tops", "Floral (Pink)");
+
+  assert.deepEqual(match.$or[0], {
+    catagory: { $in: ["women", "both"] },
+    type: { $in: ["tops"] },
+  });
+  assert.deepEqual(match.$or[1], {
+    name: { $regex: "Floral \\(Pink\\)", $options: "i" },
+  });
+  assert.deepEqual(
+    helpers.searchMatch("__no_catalog_match__", "__no_catalog_match__", "Wallet"),
+    { name: { $regex: "Wallet", $options: "i" } },
+  );
+});
+
 test("stock filters require an available selected variant", () => {
   assert.deepEqual(helpers.stockMatch({ color: "ffffff", size: "m" }), {
     stock: {
@@ -45,27 +61,20 @@ test("trending month follows the current UTC year and month", () => {
   assert.equal(helpers.currentMonth(), Number(`${now.getUTCFullYear()}${now.getUTCMonth() + 1}`));
 });
 
-test("trending falls back to all completed-order sales", () => {
-  assert.deepEqual(
-    helpers.trendingSelection({ color: "ffffff" }, false),
-    {
-      match: {
-        sales: { $gte: 1 },
-        stock: { $elemMatch: { color: { $in: ["#ffffff"] } } },
-      },
-      sort: { sales: -1, _id: 1 },
-      projection: {
-        _id: 1,
-        name: 1,
-        price: 1,
-        stock: 1,
-        createdAt: 1,
-        averageRating: { $avg: "$reviews.rating" },
-        totalRatings: { $size: { $ifNull: ["$reviews", []] } },
-        sales: 1,
-      },
-    },
-  );
+test("trending ranks current-month sales before historical sales", () => {
+  const selection = helpers.trendingSelection({ color: "ffffff" });
+
+  assert.deepEqual(selection.match, {
+    sales: { $gte: 1 },
+    stock: { $elemMatch: { color: { $in: ["#ffffff"] } } },
+  });
+  assert.deepEqual(selection.sort, {
+    currentPeriodSales: -1,
+    sales: -1,
+    _id: 1,
+  });
+  assert.equal(selection.stages[0].$set.currentPeriodSales.$sum.$map.input.$filter.cond.$eq[1], helpers.currentMonth());
+  assert.equal(selection.projection.sales, 1);
 });
 
 test("catalog products, count, and filters come from one aggregation", async () => {

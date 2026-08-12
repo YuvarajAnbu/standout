@@ -137,6 +137,7 @@ export default function EditProduct() {
             setValue,
             append,
             remove,
+            setErrorMsgs,
           }}
           loading={updateProduct.isPending}
           submitLabel="save changes"

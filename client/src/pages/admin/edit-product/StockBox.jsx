@@ -23,6 +23,7 @@ function StockBox({
   index,
   append,
   remove,
+  setErrorMsgs,
 }) {
   const colorBox = useRef(null);
   const optionsBox = useRef(null);
@@ -36,14 +37,24 @@ function StockBox({
   const imageInput = register(`stock[${index}].images`);
   const addImages = useCallback(
     async (files) => {
-      const urls = await readImagesAsDataUrls(files);
-      if (urls.length === 0) return;
-      setImages((prev) => ({
-        ...prev,
-        [imageKey]: [...(prev[imageKey] || []), ...urls].slice(0, 8),
-      }));
+      try {
+        const availableSlots = 8 - (images[imageKey]?.length || 0);
+        if (availableSlots < 1) {
+          throw new Error("Each stock item can have up to 8 images");
+        }
+        const urls = await readImagesAsDataUrls(files, {
+          maxFiles: availableSlots,
+        });
+        if (urls.length === 0) return;
+        setImages((prev) => ({
+          ...prev,
+          [imageKey]: [...(prev[imageKey] || []), ...urls],
+        }));
+      } catch (error) {
+        setErrorMsgs(error.message || "Unable to read the selected images");
+      }
     },
-    [imageKey, setImages]
+    [imageKey, images, setErrorMsgs, setImages]
   );
 
   const hide = useCallback(() => {
@@ -144,9 +155,10 @@ function StockBox({
             {...imageInput}
             onChange={(ev) => {
               imageInput.onChange(ev);
-              addImages(ev.target.files);
+              addImages(ev.target.files).finally(() => {
+                ev.target.value = "";
+              });
             }}
-            defaultValue={field.images}
           />
         </div>
       </div>

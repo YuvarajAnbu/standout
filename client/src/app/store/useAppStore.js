@@ -5,9 +5,10 @@ import { createIndexedDbStorage } from "@/shared/storage/indexedDbStorage";
 const resolveUpdate = (update, current) =>
   typeof update === "function" ? update(current) : update;
 
-const persistedKeys = ["cart", "orders", "hideOrders"];
+const persistedKeys = ["cart", "hideOrders"];
 const legacyKeys = [
   ...persistedKeys,
+  "orders",
   "userProducts",
   "hideProducts",
   "reviews",
@@ -45,7 +46,7 @@ export const useAppStore = create(
       user: {},
       cart: legacyState.cart || [],
       path: "/",
-      orders: legacyState.orders || [],
+      orders: [],
       hideOrders: legacyState.hideOrders || [],
       userProducts: legacyState.userProducts || [],
       hideProducts: legacyState.hideProducts || [],
@@ -83,7 +84,7 @@ export const useAppStore = create(
         set((state) => ({
           userCount: resolveUpdate(update, state.userCount),
         })),
-      resetSession: () => set({ user: {} }),
+      resetSession: () => set({ user: {}, orders: [] }),
     }),
     {
       name: "standout-client-state",
@@ -93,24 +94,20 @@ export const useAppStore = create(
           onMigrated: removeLegacyState,
         }),
       ),
-      partialize: ({
+      partialize: ({ cart, hideOrders }) => ({
         cart,
-        orders,
-        hideOrders,
-      }) => ({
-        cart,
-        orders,
         hideOrders,
       }),
       migrate: (persistedState) => ({
         ...persistedState,
+        orders: [],
         userProducts: [],
         hideProducts: [],
         reviews: [],
         hideReviews: [],
         userCount: 0,
       }),
-      version: 2,
+      version: 3,
     }
   )
 );

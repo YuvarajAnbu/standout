@@ -137,6 +137,7 @@
     display: flex;
     align-items: center;
     gap: 20px;
+    padding: 0 calc(6% - (42px + 20px));
 
     &__control {
       z-index: 5;
@@ -177,17 +178,16 @@
 
   &__trending {
     margin-top: 40px;
-    padding: 0 6%;
     overflow: hidden;
     margin-bottom: 100px;
     h1 {
+      margin: 0 6%;
       font-size: 30px;
       font-weight: 500;
       width: 100%;
       text-transform: uppercase;
       border-bottom: 1px solid #dddddd;
       line-height: 4rem;
-      margin-bottom: 1rem;
     }
   }
 
@@ -227,6 +227,7 @@
 
           img {
             width: 100%;
+            // box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
           }
           &__a {
             color: black;
@@ -288,9 +289,9 @@
 
   &__best-seller {
     margin-top: 50px;
-    padding: 0 6%;
     overflow: hidden;
     h1 {
+      margin: 0 6%;
       font-size: 30px;
       font-weight: 500;
       width: 100%;

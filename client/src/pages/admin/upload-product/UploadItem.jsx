@@ -105,6 +105,7 @@ export default function UploadItem() {
             setValue,
             append,
             remove,
+            setErrorMsgs,
           }}
           loading={createProduct.isPending}
           submitLabel="upload"

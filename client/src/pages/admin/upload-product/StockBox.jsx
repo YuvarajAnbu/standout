@@ -16,6 +16,7 @@ function StockBox({
   field,
   append,
   remove,
+  setErrorMsgs,
 }) {
   const colorBox = useRef(null);
   const optionsBox = useRef(null);
@@ -27,14 +28,24 @@ function StockBox({
 
   const addImages = useCallback(
     async (files) => {
-      const urls = await readImagesAsDataUrls(files);
-      if (urls.length === 0) return;
-      setImages((prev) => ({
-        ...prev,
-        [field.id]: [...(prev[field.id] || []), ...urls].slice(0, 8),
-      }));
+      try {
+        const availableSlots = 8 - (images[field.id]?.length || 0);
+        if (availableSlots < 1) {
+          throw new Error("Each stock item can have up to 8 images");
+        }
+        const urls = await readImagesAsDataUrls(files, {
+          maxFiles: availableSlots,
+        });
+        if (urls.length === 0) return;
+        setImages((prev) => ({
+          ...prev,
+          [field.id]: [...(prev[field.id] || []), ...urls],
+        }));
+      } catch (error) {
+        setErrorMsgs(error.message || "Unable to read the selected images");
+      }
     },
-    [field.id, setImages]
+    [field.id, images, setErrorMsgs, setImages]
   );
 
   const hide = useCallback(() => {
@@ -122,7 +133,9 @@ function StockBox({
             {...imageInput}
             onChange={(ev) => {
               imageInput.onChange(ev);
-              addImages(ev.target.files);
+              addImages(ev.target.files).finally(() => {
+                ev.target.value = "";
+              });
             }}
           />
         </div>

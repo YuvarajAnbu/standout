@@ -3,10 +3,11 @@ import { useMutation } from "@tanstack/react-query";
 import { useAppStore } from "@/app/store/useAppStore";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { apiRequest } from "@/shared/api/client";
-import { cachedGet } from "@/shared/api/queries";
+import { cachedGet, queryKeys } from "@/shared/api/queries";
 import { queryClient } from "@/shared/api/queryClient";
 import { loadScripts } from "@/shared/utils/loadScript";
 import { reportError } from "@/shared/utils/logger";
+import { upsertOrder } from "@/features/orders/utils/orders";
 
 function Card({
   cart,
@@ -21,7 +22,12 @@ function Card({
     mutationFn: (payment) =>
       apiRequest("/payment/checkout", { method: "POST", body: payment }),
     onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["http", "/user/orders"] }),
+      Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.orders,
+        }),
+        queryClient.invalidateQueries({ queryKey: ["products"] }),
+      ]),
   });
   const paymentStateRef = useRef({ cart, billingDetails, subTotal });
   const checkoutRef = useRef(checkout);
@@ -41,9 +47,9 @@ function Card({
   useEffect(() => {
     let active = true;
     loadScripts([
-        "https://js.braintreegateway.com/web/3.92.1/js/client.min.js",
-        "https://js.braintreegateway.com/web/3.92.1/js/hosted-fields.min.js",
-      ])
+      "https://js.braintreegateway.com/web/3.92.1/js/client.min.js",
+      "https://js.braintreegateway.com/web/3.92.1/js/hosted-fields.min.js",
+    ])
       .then(() => active && setScriptLoaded(true))
       .catch(() => active && setError("Unable to load payment form"));
 
@@ -53,16 +59,34 @@ function Card({
   }, []);
 
   useEffect(() => {
+    let active = true;
     let form;
     let submitHandler;
     let hostedFieldsInstanceRef;
+    let teardownStarted = false;
+
+    const teardownHostedFields = () => {
+      if (!hostedFieldsInstanceRef || teardownStarted) return;
+
+      teardownStarted = true;
+      hostedFieldsInstanceRef.teardown((teardownError) => {
+        if (
+          teardownError &&
+          teardownError.code !== "METHOD_CALLED_AFTER_TEARDOWN"
+        ) {
+          reportError(teardownError, { area: "card teardown" });
+        }
+      });
+    };
 
     if (scriptLoaded) {
       cachedGet("/payment/client_token", { staleTime: 10 * 60_000 })
         .then((res) => {
-          if (res.status === 200) {
+          if (active && res.status === 200) {
             form = document.querySelector("#hosted-fields-form");
             const submit = document.querySelector("#payment-card-btn");
+
+            if (!form || !submit) return;
 
             window.braintree.client.create(
               {
@@ -70,6 +94,7 @@ function Card({
                 authorization: res.data,
               },
               function (clientErr, clientInstance) {
+                if (!active) return;
                 if (clientErr) {
                   console.error(clientErr);
                   return;
@@ -102,6 +127,10 @@ function Card({
                     },
                   },
                   function (hostedFieldsErr, hostedFieldsInstance) {
+                    if (!active) {
+                      hostedFieldsInstance?.teardown?.(() => {});
+                      return;
+                    }
                     if (hostedFieldsErr) {
                       console.error(hostedFieldsErr);
                       return;
@@ -113,12 +142,10 @@ function Card({
                     setHide(false);
 
                     submitHandler = function (event) {
-                        event.preventDefault();
-                        setLoading(true);
-                        hostedFieldsInstance.tokenize(function (
-                          tokenizeErr,
-                          payload
-                        ) {
+                      event.preventDefault();
+                      setLoading(true);
+                      hostedFieldsInstance.tokenize(
+                        function (tokenizeErr, payload) {
                           if (tokenizeErr) {
                             setError("Invalid card Details");
                             console.error(tokenizeErr);
@@ -137,59 +164,57 @@ function Card({
                             billingDetails: currentBillingDetails,
                           };
 
-                          checkoutRef.current(opt)
+                          checkoutRef
+                            .current(opt)
                             .then((response) => {
-                              hostedFieldsInstance.teardown(function (
-                                teardownErr
-                              ) {
-                                if (teardownErr) {
-                                  console.error(
-                                    "Could not tear down the Hosted Fields form!"
-                                  );
-                                } else {
-                                  console.info(
-                                    "Hosted Fields form has been torn down!"
-                                  );
-                                }
-                              });
                               setLoading(false);
                               setPaymentSuccess(true);
                               const createdOrder = response?.order;
-                              setOrders((prev) => [
-                                ...prev,
-                                {
+                              setOrders((prev) => {
+                                const localOrderId =
+                                  createdOrder?._id ?? prev.length + 1;
+                                setOrderId(localOrderId);
+                                return upsertOrder(prev, {
                                   ...(createdOrder || {}),
-                                  _id: createdOrder?._id ?? prev.length + 1,
+                                  _id: localOrderId,
                                   items: createdOrder?.items ?? currentCart,
                                   delivered: createdOrder?.delivered ?? false,
-                                  customer: createdOrder?.customer ?? currentBillingDetails.user,
-                                  amount: createdOrder?.amount ?? (
-                                    Number(currentSubTotal() / 100) +
-                                    Number((currentSubTotal() * 2) / 10000)
-                                  ).toFixed(2),
-                                  shippingAddress: createdOrder?.shippingAddress ??
+                                  customer:
+                                    createdOrder?.customer ??
+                                    currentBillingDetails.user,
+                                  amount:
+                                    createdOrder?.amount ??
+                                    (
+                                      Number(currentSubTotal() / 100) +
+                                      Number((currentSubTotal() * 2) / 10000)
+                                    ).toFixed(2),
+                                  shippingAddress:
+                                    createdOrder?.shippingAddress ??
                                     currentBillingDetails.address.shipping,
-                                  billingAddress: createdOrder?.billingAddress ??
+                                  billingAddress:
+                                    createdOrder?.billingAddress ??
                                     currentBillingDetails.address.billing,
-                                  date: createdOrder?.date ?? new Date().toISOString(),
-                                },
-                              ]);
-                              setOrderId(
-                                createdOrder?._id ?? useAppStore.getState().orders.length
-                              );
+                                  date:
+                                    createdOrder?.date ??
+                                    new Date().toISOString(),
+                                });
+                              });
                             })
                             .catch((error) => {
                               reportError(error, { area: "card payment" });
-                              setError("Something went wrong. Please try again");
+                              setError(
+                                "Something went wrong. Please try again",
+                              );
                               setLoading(false);
                               setPaymentFailed(true);
                             });
-                        });
-                      };
+                        },
+                      );
+                    };
                     form.addEventListener("submit", submitHandler, false);
-                  }
+                  },
                 );
-              }
+              },
             );
           }
         })
@@ -198,12 +223,19 @@ function Card({
     }
 
     return () => {
+      active = false;
       if (form && submitHandler) {
         form.removeEventListener("submit", submitHandler, false);
       }
-      hostedFieldsInstanceRef?.teardown?.(() => {});
+      teardownHostedFields();
     };
-  }, [scriptLoaded, setOrderId, setOrders, setPaymentFailed, setPaymentSuccess]);
+  }, [
+    scriptLoaded,
+    setOrderId,
+    setOrders,
+    setPaymentFailed,
+    setPaymentSuccess,
+  ]);
 
   return scriptLoaded ? (
     <div className="billing__checkout__content__container__form">

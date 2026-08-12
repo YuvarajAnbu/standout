@@ -7,11 +7,12 @@ import { imgPrefix } from "@/shared/utils/images";
 import "@/pages/cart/Checkout.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { apiRequest } from "@/shared/api/client";
-import { cachedGet } from "@/shared/api/queries";
+import { cachedGet, queryKeys } from "@/shared/api/queries";
 import { queryClient } from "@/shared/api/queryClient";
 import { loadScripts } from "@/shared/utils/loadScript";
 import { getCartItemCount, getCartSubtotal } from "@/features/cart/utils/cart";
 import { getColorName } from "@/features/catalog/utils/colors";
+import { upsertOrder } from "@/features/orders/utils/orders";
 
 function Checkout() {
   const navigate = useNavigate();
@@ -23,7 +24,12 @@ function Checkout() {
     mutationFn: (payment) =>
       apiRequest("/payment/paypal", { method: "POST", body: payment }),
     onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["http", "/user/orders"] }),
+      Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.orders,
+        }),
+        queryClient.invalidateQueries({ queryKey: ["products"] }),
+      ]),
   });
 
   const [scriptLoaded, setScriptLoaded] = useState(false);
@@ -115,16 +121,13 @@ function Checkout() {
                   setOrders((prev) => {
                     const localOrderId = order?._id ?? prev.length + 1;
                     setOrderId(localOrderId);
-                    return [
-                      ...prev,
-                      {
-                        ...order,
-                        _id: localOrderId,
-                        items: currentCart,
-                        delivered: false,
-                        date: new Date().toISOString(),
-                      },
-                    ];
+                    return upsertOrder(prev, {
+                      ...order,
+                      _id: localOrderId,
+                      items: order?.items ?? currentCart,
+                      delivered: order?.delivered ?? false,
+                      date: order?.date ?? new Date().toISOString(),
+                    });
                   });
                 })
                 .catch(() => {

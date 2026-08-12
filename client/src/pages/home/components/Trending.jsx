@@ -5,7 +5,7 @@ export default function Trending() {
   return (
     <ProductCarousel
       collection="trending"
-      title="Trending this week"
+      title="Trending this month"
       showRatings={false}
       prioritizeImages
       seeMorePath="trending"

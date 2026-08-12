@@ -422,24 +422,20 @@
                 font-size: 13px;
                 margin: 5px;
                 border: 1px solid black;
-
-                &:last-child {
-                  border: 1px solid rgb(255, 255, 255);
-                }
               }
 
               &__yes {
                 display: flex !important;
                 justify-content: center;
                 align-items: center;
+                border: black 1px solid;
+                background-color: white !important;
+                color: black !important;
 
                 &--loading {
-                  background-color: white;
-
                   &:hover,
                   &:focus {
                     background-color: white !important;
-                    color: black !important;
                     opacity: 0.7 !important;
                   }
                 }
@@ -449,7 +445,8 @@
                   height: 15px;
                   border: double 1px transparent;
                   border-radius: 80px;
-                  background-image: linear-gradient(white, white),
+                  background-image:
+                    linear-gradient(white, white),
                     radial-gradient(
                       circle at top,
                       rgb(94, 94, 94) 30%,
@@ -606,7 +603,8 @@
         height: 15px;
         border: double 1px transparent;
         border-radius: 80px;
-        background-image: linear-gradient(white, white),
+        background-image:
+          linear-gradient(white, white),
           radial-gradient(circle at top, rgb(94, 94, 94) 30%, rgb(0, 0, 0) 70%);
         background-origin: border-box;
         background-clip: content-box, border-box;

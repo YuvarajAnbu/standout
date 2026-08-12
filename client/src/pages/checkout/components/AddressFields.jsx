@@ -1,38 +1,50 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
+const NAME_PATTERN = /^(?=(?:.*\p{L}){2})[\p{L}\p{M} .'’-]+$/u;
+const ADDRESS_PATTERN =
+  /^(?=(?:.*[\p{L}\p{N}]){2})[\p{L}\p{M}\p{N} .,'’#&/()-]+$/u;
+const POSTAL_CODE_PATTERN = /^\d{5}(?:-\d{4})?$/;
+
 const fieldRules = {
   firstName: {
-    pattern: /^[\w ]{0,}[\w]{2,}[\w ]{0,}$/,
+    pattern: NAME_PATTERN,
     message: "Should contain at least two letters",
     required: "Required",
   },
   lastName: {
-    pattern: /^[\w ]{0,}[\w]{2,}[\w ]{0,}$/,
+    pattern: NAME_PATTERN,
     message: "Should contain at least two letters",
     required: "Required",
   },
   streetAddress: {
-    pattern: /^[\w ]{0,}[\w\d]{2,}[\w ]{0,}$/,
+    pattern: ADDRESS_PATTERN,
     message: "Should contain at least two letters or numbers",
     required: "Required",
   },
   extendedAddress: {
-    pattern: /^[\w ]{0,}[\w\d]{2,}[\w ]{0,}$/,
+    pattern: ADDRESS_PATTERN,
     message: "Should contain at least two letters or numbers",
   },
   postalCode: {
-    pattern: /^\d{5}(-?\d{4})?$/,
-    message: "Invalid postal code",
+    pattern: POSTAL_CODE_PATTERN,
+    message: "Invalid postal code. eg: 12345 or 12345-6789",
     required: "Required",
   },
   locality: {
-    pattern: /^[\w ]{0,}[\w]{2,}[\w ]{0,}$/,
+    pattern: NAME_PATTERN,
     message: "Should contain at least two letters",
     required: "Required",
   },
 };
 
-function AddressInput({ prefix, field, label, register, errors, defaultValue }) {
+function AddressInput({
+  prefix,
+  field,
+  label,
+  register,
+  errors,
+  defaultValue,
+}) {
   const error = errors?.[prefix]?.[field];
   const rules = fieldRules[field];
   const id = `${prefix}-${field}`;
@@ -69,14 +81,56 @@ export default function AddressFields({
   return (
     <>
       <div className="billing__checkout__content__container__form__flex">
-        <AddressInput prefix={prefix} field="firstName" label="first name" register={register} errors={errors} defaultValue={defaultAddress.firstName} />
-        <AddressInput prefix={prefix} field="lastName" label="last name" register={register} errors={errors} defaultValue={defaultAddress.lastName} />
+        <AddressInput
+          prefix={prefix}
+          field="firstName"
+          label="first name"
+          register={register}
+          errors={errors}
+          defaultValue={defaultAddress.firstName}
+        />
+        <AddressInput
+          prefix={prefix}
+          field="lastName"
+          label="last name"
+          register={register}
+          errors={errors}
+          defaultValue={defaultAddress.lastName}
+        />
       </div>
-      <AddressInput prefix={prefix} field="streetAddress" label="street address" register={register} errors={errors} defaultValue={defaultAddress.streetAddress} />
-      <AddressInput prefix={prefix} field="extendedAddress" label="Apt #, Floor, etc. (optional)" register={register} errors={errors} defaultValue={defaultAddress.extendedAddress} />
+      <AddressInput
+        prefix={prefix}
+        field="streetAddress"
+        label="street address"
+        register={register}
+        errors={errors}
+        defaultValue={defaultAddress.streetAddress}
+      />
+      <AddressInput
+        prefix={prefix}
+        field="extendedAddress"
+        label="Apt #, Floor, etc. (optional)"
+        register={register}
+        errors={errors}
+        defaultValue={defaultAddress.extendedAddress}
+      />
       <div className="billing__checkout__content__container__form__flex">
-        <AddressInput prefix={prefix} field="postalCode" label="postal code" register={register} errors={errors} defaultValue={defaultAddress.postalCode} />
-        <AddressInput prefix={prefix} field="locality" label="city" register={register} errors={errors} defaultValue={defaultAddress.locality} />
+        <AddressInput
+          prefix={prefix}
+          field="postalCode"
+          label="postal code"
+          register={register}
+          errors={errors}
+          defaultValue={defaultAddress.postalCode}
+        />
+        <AddressInput
+          prefix={prefix}
+          field="locality"
+          label="city"
+          register={register}
+          errors={errors}
+          defaultValue={defaultAddress.locality}
+        />
       </div>
       <div className="billing__checkout__content__container__form__input-container">
         <label htmlFor={`${prefix}-region`}>

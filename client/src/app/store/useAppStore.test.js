@@ -17,10 +17,12 @@ describe("useAppStore", () => {
   });
 
   it("keeps session state separate from persisted shopping state", () => {
-    const { setUser, resetSession } = useAppStore.getState();
+    const { setUser, setOrders, resetSession } = useAppStore.getState();
     setUser({ name: "Customer" });
+    setOrders([{ _id: "order-1" }]);
     resetSession();
 
     expect(useAppStore.getState().user).toEqual({});
+    expect(useAppStore.getState().orders).toEqual([]);
   });
 });

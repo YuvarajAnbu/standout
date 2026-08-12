@@ -92,8 +92,8 @@ function UpdateOrder() {
 
         {typeof order._id !== "undefined" ? (
           <div className="update-order__order">
-            <div className="update-order__order__delivered">
-              <p>delivered</p>
+            <label className="update-order__order__delivered">
+              <span>delivered</span>
               <input
                 type="checkbox"
                 checked={order.delivered}
@@ -106,7 +106,7 @@ function UpdateOrder() {
                   });
                 }}
               />
-            </div>
+            </label>
             {delivered !== order.delivered && (
               <div>
                 {submitLoading ? (

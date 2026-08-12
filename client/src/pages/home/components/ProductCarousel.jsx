@@ -76,7 +76,7 @@ function ProductCarousel({
               breakpoints={{
                 1900: {
                   spaceBetween: 39,
-                  slidesPerView: 7.5,
+                  slidesPerView: 8.5,
                 },
                 1800: {
                   spaceBetween: 36.4,

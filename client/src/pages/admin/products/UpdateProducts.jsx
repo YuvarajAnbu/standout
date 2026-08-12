@@ -10,7 +10,7 @@ import ShopItem from "@/pages/admin/products/components/ShopItem";
 import "@/features/catalog/Shop.scss";
 import products from "@/features/catalog/data/products";
 import pluralize from "pluralize";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useMediaQuery } from "@/shared/hooks/useMediaQuery";
 import { useTimedMessages } from "@/shared/hooks/useTimedMessages";
 import MessageBanner from "@/shared/components/ui/MessageBanner";
@@ -27,9 +27,8 @@ const NO_MATCH = "__no_catalog_match__";
 const NO_SEARCH = "__no_search__";
 
 function UpdateProducts() {
-  // const history = useHistory();
-  const location = useLocation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const { uploadOptions } = products;
 
@@ -98,34 +97,18 @@ function UpdateProducts() {
 
   // changing search query
   useEffect(() => {
-    const query = location.search.replace("?", "").split("&");
-    if (query.length >= 1) {
-      if (query.filter((el) => el.includes("q=")).length >= 1) {
-        if (
-          decodeURI(
-            query.filter((el) => el.includes("q="))[0].replace("q=", "")
-          ) !== ""
-        ) {
-          setSearch(
-            decodeURI(
-              query.filter((el) => el.includes("q="))[0].replace("q=", "")
-            )
-          );
-          setInput(
-            decodeURI(
-              query.filter((el) => el.includes("q="))[0].replace("q=", "")
-            )
-          );
-        } else {
-          setSearch(NO_SEARCH);
-        }
-      } else {
-        setSearch(NO_SEARCH);
-      }
-    } else {
-      setSearch(NO_SEARCH);
-    }
-  }, [location]);
+    const query = searchParams.get("q")?.trim() || "";
+    setSearch(query || NO_SEARCH);
+    setInput(query);
+  }, [searchParams]);
+
+  const submitSearch = (event) => {
+    event.preventDefault();
+    const query = input.trim();
+    if (!query) return;
+
+    navigate(`/update-products?${new URLSearchParams({ q: query })}`);
+  };
 
   // updating catagory and type
   useEffect(() => {
@@ -223,7 +206,16 @@ function UpdateProducts() {
     enabled: catagory.length > 0 && type.length > 0 && !noResults,
     queryFn: ({ pageParam, signal }) =>
       apiRequest(
-        `/product/${catagory}/${type}?page=${pageParam}&limit=${limit}&sort=${filter.sort}&color=${filter.color}&size=${filter.size}&filter=${lastClicked}&includeFilters=${pageParam === 1}`,
+        `/product/${catagory}/${type}?${new URLSearchParams({
+          page: pageParam,
+          limit,
+          sort: filter.sort,
+          color: filter.color.join(","),
+          size: filter.size.join(","),
+          filter: lastClicked,
+          includeFilters: pageParam === 1,
+          q: search === NO_SEARCH ? "" : search,
+        })}`,
         { signal },
       ),
     getNextPageParam: (lastPage, pages) => {
@@ -297,12 +289,7 @@ function UpdateProducts() {
           >
             <path d="M 13 3 C 7.4889971 3 3 7.4889971 3 13 C 3 18.511003 7.4889971 23 13 23 C 15.396508 23 17.597385 22.148986 19.322266 20.736328 L 25.292969 26.707031 A 1.0001 1.0001 0 1 0 26.707031 25.292969 L 20.736328 19.322266 C 22.148986 17.597385 23 15.396508 23 13 C 23 7.4889971 18.511003 3 13 3 z M 13 5 C 17.430123 5 21 8.5698774 21 13 C 21 17.430123 17.430123 21 13 21 C 8.5698774 21 5 17.430123 5 13 C 5 8.5698774 8.5698774 5 13 5 z"></path>
           </svg>
-          <form
-            onSubmit={(event) => {
-              event.preventDefault();
-              navigate(`/update-products?q=${encodeURIComponent(input.trim())}`);
-            }}
-          >
+          <form onSubmit={submitSearch}>
             <input
               type="text"
               value={input}

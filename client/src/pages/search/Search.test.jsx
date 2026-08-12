@@ -72,6 +72,30 @@ describe("Search", () => {
   });
 
   it("labels recommendations as no results when no search terms match", async () => {
+    fetch.mockImplementation((url) =>
+      Promise.resolve({
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        headers: { get: () => "application/json" },
+        json: () =>
+          Promise.resolve(
+            url.includes("/product/best-seller?")
+              ? {
+                  count: 1,
+                  products: [product],
+                  filters: { colors: ["#000000"], sizes: ["m"] },
+                }
+              : {
+                  count: 0,
+                  products: [],
+                  filters: { colors: [], sizes: [] },
+                },
+          ),
+        text: () => Promise.resolve(""),
+      }),
+    );
+
     render(
       <QueryClientProvider client={queryClient}>
         <MemoryRouter initialEntries={["/search?q=sdasdasd"]}>
@@ -86,6 +110,10 @@ describe("Search", () => {
       }),
     ).toBeInTheDocument();
     expect(screen.getByText("recommended for you")).toBeInTheDocument();
-    expect(fetch.mock.calls[0][0]).toContain("/product/best-seller?");
+    expect(fetch.mock.calls[0][0]).toContain(
+      "/product/__no_catalog_match__/__no_catalog_match__?",
+    );
+    expect(fetch.mock.calls[0][0]).toContain("q=sdasdasd");
+    expect(fetch.mock.calls[1][0]).toContain("/product/best-seller?");
   });
 });

@@ -12,7 +12,6 @@ function Address({
   setBillingDetails,
   user,
 }) {
-
   const [addresses, setAddresses] = useState([]);
   const [hideBillingAddress, setHideBillingAddress] = useState(true);
   const [showShippingForm, setShowShippingForm] = useState(true);
@@ -159,28 +158,29 @@ function Address({
             usStates,
           }}
         />
-        <div className="billing__checkout__content__container__form__checkbox">
-          <button
-            type="button"
-            className="billing__checkout__content__container__form__checkbox__icons"
-            onClick={() => {
-              setHideBillingAddress((prev) => !prev);
-              setBillingDetails((prev) => ({
-                ...prev,
-                address: { shipping: prev.address.shipping },
-              }));
-            }}
-            aria-label="Use shipping address as billing address"
-            aria-pressed={hideBillingAddress}
-          >
+        <button
+          type="button"
+          className="billing__checkout__content__container__form__checkbox"
+          onClick={() => {
+            setHideBillingAddress((prev) => !prev);
+            setBillingDetails((prev) => ({
+              ...prev,
+              address: { shipping: prev.address.shipping },
+            }));
+          }}
+          aria-label="Use shipping address as billing address"
+          aria-pressed={hideBillingAddress}
+        >
+          <span className="billing__checkout__content__container__form__checkbox__icon">
             {hideBillingAddress ? (
               <FontAwesomeIcon icon="check-square" />
             ) : (
               <FontAwesomeIcon icon={["far", "square"]} />
             )}
-          </button>
-          <p>Billing Address is same as the Shipping Address</p>
-        </div>
+          </span>
+
+          <span>Billing Address is same as the Shipping Address</span>
+        </button>
         {!hideBillingAddress && (
           <AddressBilling
             {...{

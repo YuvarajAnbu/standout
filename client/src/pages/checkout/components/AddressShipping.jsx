@@ -29,14 +29,18 @@ export default function AddressShipping({
 
   return (
     <div>
-      <p className="billing__checkout__content__container__form__label">
+      <div className="billing__checkout__content__container__form__label">
         shipping address
         {addresses.length >= 1 && showShippingForm && (
-          <button type="button" onClick={() => setShowShippingForm(false)} style={{ all: "unset", cursor: "pointer" }}>
+          <button
+            className="billing__checkout__content__container__form__label__button"
+            type="button"
+            onClick={() => setShowShippingForm(false)}
+          >
             use saved address
           </button>
         )}
-      </p>
+      </div>
       {errors.addressShipping && (
         <p className="billing__checkout__content__container__form__input-container__error-msg">
           {errors.addressShipping.message}
@@ -53,20 +57,27 @@ export default function AddressShipping({
       ) : (
         <div className="billing__checkout__content__container__address-container">
           {addresses.map((address, index) => (
-            <label className="billing__checkout__content__container__address-container__address" key={address._id ?? index}>
+            <label
+              className="billing__checkout__content__container__address-container__address"
+              key={address._id ?? index}
+            >
               <input
                 type="radio"
                 value={index}
-                {...register("addressShipping", { required: "Address cannot be empty" })}
+                {...register("addressShipping", {
+                  required: "Address cannot be empty",
+                })}
                 onChange={() => selectAddress(address)}
               />
-              <span className="billing__checkout__content__container__address-container__address__icon" />
-              <span className="billing__checkout__content__container__address-container__address__desc">
+              <div className="billing__checkout__content__container__address-container__address__icon" />
+              <div className="billing__checkout__content__container__address-container__address__desc">
                 <strong>{`${address.firstName} ${address.lastName}`}</strong>
-                {address.extendedAddress && <span>{address.extendedAddress},</span>}
-                <span>{address.streetAddress},</span>
-                <span>{`${address.locality}, ${address.region} ${address.postalCode}`}</span>
-              </span>
+                {address.extendedAddress && (
+                  <span>{address.extendedAddress},</span>
+                )}
+                <p>{address.streetAddress},</p>
+                <p>{`${address.locality}, ${address.region} ${address.postalCode}`}</p>
+              </div>
             </label>
           ))}
           <button
