@@ -193,15 +193,24 @@ function ProductCarousel({
 
       {isPending && (
         <div className="home__loading__items-container">
+          <button
+            type="button"
+            className="product-carousel__control product-carousel__control--previous"
+            aria-label={`Previous ${title.toLowerCase()} products`}
+            disabled
+            onClick={() => moveCarousel("previous")}
+          >
+            <FontAwesomeIcon icon="chevron-right" rotation={180} />
+          </button>
           <Swiper
             spaceBetween={13}
-            slidesPerView={2.5}
+            slidesPerView={1.5}
             grabCursor
             autoHeight
             breakpoints={{
               1900: {
                 spaceBetween: 39,
-                slidesPerView: 7.5,
+                slidesPerView: 8.5,
               },
               1800: {
                 spaceBetween: 36.4,
@@ -251,6 +260,15 @@ function ProductCarousel({
               </SwiperSlide>
             ))}
           </Swiper>
+          <button
+            type="button"
+            className="product-carousel__control product-carousel__control--next"
+            aria-label={`Next ${title.toLowerCase()} products`}
+            disabled
+            onClick={() => moveCarousel("next")}
+          >
+            <FontAwesomeIcon icon="chevron-right" />
+          </button>
         </div>
       )}
       {!isPending && items.length < 1 && (

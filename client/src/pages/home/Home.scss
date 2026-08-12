@@ -1,6 +1,10 @@
 .home {
   &__loading {
     &__items-container {
+      padding: 0 calc(6% - (42px + 20px));
+      display: flex;
+      align-items: center;
+      gap: 20px;
       &__item {
         width: 100%;
         max-width: 161px;
